@@ -13,21 +13,33 @@
 </head>
 <body class="bg-[#12092b] text-white font-sans antialiased min-h-screen flex flex-col selection:bg-purple-600 selection:text-white">
 
-    <!-- BARRA SUPERIOR -->
+    <!-- CONTENEDOR DE NOTIFICACIONES TOAST GAMER -->
+    <div id="toastNotificationContainer" class="fixed top-5 right-5 z-[60] flex flex-col gap-2.5 pointer-events-none"></div>
+
+    <!-- BARRA SUPERIOR CON SELECTOR DE MONEDA Y CUENTA -->
     <div class="bg-[#0d0620] border-b border-purple-900/40 text-xs py-2 px-4">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div class="flex items-center space-x-4 text-purple-200">
-                <span class="flex items-center gap-1.5 font-medium">
-                    <i class="fa-solid fa-earth-americas text-fuchsia-400"></i> Español Latinoamericano | ARS ($)
-                </span>
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-earth-americas text-fuchsia-400"></i>
+                    <span class="hidden sm:inline font-medium">Español (LATAM)</span>
+                    <span class="text-purple-700">|</span>
+                    <!-- Selector Multimoneda en Tiempo Real -->
+                    <select id="currencySelector" onchange="changeCurrency(this.value)" class="bg-[#1c0e42] border border-purple-700/70 text-white font-bold rounded-lg px-2 py-0.5 text-[11px] focus:outline-none focus:border-fuchsia-400 cursor-pointer">
+                        <option value="ARS">🇦🇷 ARS ($)</option>
+                        <option value="USD">🇺🇸 USD ($)</option>
+                        <option value="EUR">🇪🇺 EUR (€)</option>
+                    </select>
+                </div>
                 <span class="hidden md:inline text-purple-700">|</span>
                 <span class="hidden md:inline text-purple-300">
                     <i class="fa-solid fa-bolt text-emerald-400 mr-1"></i> Entrega Digital Instantánea Argon Shield
                 </span>
             </div>
-            <div class="flex items-center space-x-3">
+
+            <div class="flex items-center space-x-2.5">
                 <button onclick="openPacksModal()" class="hidden sm:flex items-center gap-1.5 text-fuchsia-300 hover:text-white font-bold bg-fuchsia-950/60 border border-fuchsia-500/40 px-2.5 py-1 rounded-lg transition">
-                    <i class="fa-solid fa-dice text-amber-400"></i> Argon Packs
+                    <i class="fa-solid fa-dice text-amber-400"></i> Mystery Packs
                 </button>
                 <button onclick="openVaultModal()" class="text-purple-200 hover:text-white font-bold flex items-center gap-1.5 bg-[#1f1147] border border-purple-700/60 px-2.5 py-1 rounded-lg transition">
                     <i class="fa-solid fa-key text-emerald-400"></i> Mis Keys (<span id="vaultCountBadge">0</span>)
@@ -80,14 +92,14 @@
                     <span id="wishlistBadge" class="absolute -top-1.5 -right-1.5 bg-pink-500 text-white text-[10px] font-black px-1.5 rounded-full">0</span>
                 </button>
 
-                <!-- Cartera -->
-                <div class="hidden sm:flex items-center space-x-2.5 bg-[#261556] border border-purple-700/60 px-3.5 py-2 rounded-xl">
+                <!-- Cartera Argon (Empieza en $0.00 y abre modal de canje al hacer clic) -->
+                <button onclick="openWalletModal()" class="hidden sm:flex items-center space-x-2.5 bg-[#261556] hover:bg-[#311b6e] border border-purple-700/60 px-3.5 py-2 rounded-xl transition text-left">
                     <i class="fa-solid fa-wallet text-emerald-400 text-base"></i>
                     <div>
                         <span class="block text-[10px] text-purple-300 leading-none">Cartera Argon</span>
-                        <span id="walletBalance" class="text-xs font-extrabold text-emerald-400">$5.000,00 ARS</span>
+                        <span id="walletBalance" class="text-xs font-extrabold text-emerald-400">$0,00 ARS</span>
                     </div>
-                </div>
+                </button>
 
                 <!-- Carro -->
                 <button onclick="toggleCart()" class="relative bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg shadow-purple-900/40 transition">
@@ -129,9 +141,9 @@
             </div>
 
             <div class="hidden lg:flex items-center space-x-2 text-xs text-purple-200 font-medium">
-                <span>Español Latinoamericano</span>
+                <span>Compra 100% Protegida</span>
                 <span>|</span>
-                <span>ARS ($)</span>
+                <span id="checkoutCurrencyLabel">ARS ($)</span>
             </div>
         </div>
     </header>
@@ -142,156 +154,87 @@
         <!-- VISTA 1: CATÁLOGO DE LA TIENDA -->
         <section id="viewStore" class="space-y-7">
             
-            <!-- HERO BANNER MULTIPANEL REINVENTADO (ESTILO ENEBA / ARGON VICE) -->
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 rounded-2xl overflow-hidden shadow-2xl">
-                
-                <!-- PANEL 1: BANNER PRINCIPAL VICE / GTA VI (7 COLUMNAS) -->
-                <div class="lg:col-span-7 relative min-h-[290px] md:min-h-[330px] rounded-2xl overflow-hidden bg-gradient-to-br from-[#2a0845] via-[#641168] to-[#f76b1c] border border-fuchsia-500/40 p-6 flex flex-col md:flex-row items-center justify-between gap-6 group">
-                    <div class="absolute inset-0 bg-[radial-gradient(circle_at_35%_30%,rgba(236,72,153,0.35),transparent_65%)] pointer-events-none"></div>
-                    <div class="absolute -bottom-16 -left-16 w-72 h-72 bg-purple-600/30 rounded-full blur-3xl pointer-events-none"></div>
+            <!-- NUEVO BANNER CINEMÁTICO INTERACTIVO HD (ESTILO EPIC GAMES / ENEBA PRO) -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+                <!-- Escenario Principal Panorámico (8 columnas) -->
+                <div id="heroMainStage" class="lg:col-span-8 relative min-h-[320px] md:min-h-[380px] rounded-2xl overflow-hidden border border-purple-700/60 shadow-2xl flex items-end p-6 md:p-10 group bg-[#180b38]">
+                    <img id="heroSlideBg" src="https://cdn.cloudflare.steamstatic.com/steam/apps/2358720/library_hero.jpg" alt="Featured Game" class="absolute inset-0 w-full h-full object-cover object-center transition-all duration-700 scale-105 group-hover:scale-100">
+                    <!-- Degradado oscuro cinemático -->
+                    <div class="absolute inset-0 bg-gradient-to-t from-[#0d0521] via-[#12092b]/70 to-transparent"></div>
+                    <div class="absolute inset-0 bg-gradient-to-r from-[#0d0521]/95 via-[#0d0521]/40 to-transparent"></div>
 
-                    <!-- Tarjetas flotantes izquierda -->
-                    <div class="hidden sm:flex flex-col gap-3 z-10 shrink-0">
-                        <div onclick="filterByBanner('giftcard')" class="cursor-pointer floating-card-left w-28 h-36 rounded-xl bg-gradient-to-b from-[#00439c] to-[#001b47] border border-sky-400/50 p-2.5 flex flex-col justify-between shadow-2xl -rotate-12">
-                            <span class="text-[9px] font-extrabold tracking-wider text-sky-300 uppercase">PlayStation Store</span>
-                            <div class="my-auto text-center">
-                                <i class="fa-brands fa-playstation text-3xl text-white"></i>
-                            </div>
-                            <span class="text-[10px] font-black text-white bg-sky-500/30 rounded px-1.5 py-0.5 text-center">$50 USD</span>
-                        </div>
-                        <div onclick="filterByBanner('giftcard')" class="cursor-pointer floating-card-right w-28 h-36 rounded-xl bg-gradient-to-b from-[#107c10] to-[#052e16] border border-emerald-400/50 p-2.5 flex flex-col justify-between shadow-2xl rotate-6 -mt-6 ml-6">
-                            <span class="text-[9px] font-extrabold tracking-wider text-emerald-300 uppercase">Xbox Live</span>
-                            <div class="my-auto text-center">
-                                <i class="fa-brands fa-xbox text-3xl text-white"></i>
-                            </div>
-                            <span class="text-[10px] font-black text-white bg-emerald-500/30 rounded px-1.5 py-0.5 text-center">$25.000 ARS</span>
-                        </div>
-                    </div>
-
-                    <!-- Centro: Logo Vice VI + ¡Ya llega! + Botón TARJETAS -->
-                    <div class="relative z-20 text-center flex-1 space-y-3 my-auto">
-                        <div class="inline-block relative">
-                            <span class="block text-5xl md:text-6xl font-black italic tracking-tighter bg-gradient-to-b from-fuchsia-300 via-pink-500 to-amber-400 bg-clip-text text-transparent drop-shadow-[0_4px_12px_rgba(236,72,153,0.6)]">
-                                VICE VI
+                    <!-- Contenido del Slide Activo -->
+                    <div class="relative z-10 max-w-xl space-y-3">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span id="heroSlideBadge" class="bg-amber-400 text-slate-950 font-black text-[11px] px-2.5 py-0.5 rounded-md uppercase tracking-wider shadow">
+                                DESTACADO DE LA SEMANA
                             </span>
-                            <span class="block -mt-3 text-lg md:text-xl font-black uppercase tracking-widest text-white drop-shadow">
-                                Grand Argon Auto
+                            <span id="heroSlidePlatform" class="bg-purple-900/80 backdrop-blur-md border border-purple-500/40 text-purple-100 text-[11px] font-bold px-2.5 py-0.5 rounded-md">
+                                Steam • GLOBAL
                             </span>
                         </div>
 
-                        <p class="text-xl md:text-2xl font-black text-white drop-shadow-md">
-                            ¡Ya llega!
+                        <h1 id="heroSlideTitle" class="text-3xl md:text-5xl font-black text-white tracking-tight leading-none drop-shadow-lg">
+                            Black Myth: Wukong
+                        </h1>
+
+                        <p id="heroSlideDesc" class="text-xs md:text-sm text-purple-200/90 line-clamp-2">
+                            Adéntrate en un RPG de acción épico inspirado en la mitología clásica con entrega digital inmediata y Cashback garantizado en tu Cartera Argon.
                         </p>
 
-                        <div class="pt-1">
-                            <button onclick="filterByBanner('giftcard')" class="bg-[#2b35ff] hover:bg-[#414aff] text-white font-black text-xs md:text-sm uppercase tracking-widest px-9 py-3 rounded-lg shadow-[0_6px_20px_rgba(43,53,255,0.65)] hover:scale-105 transition">
-                                TARJETAS
-                            </button>
-                        </div>
-                    </div>
+                        <div class="flex flex-wrap items-center gap-4 pt-2">
+                            <div>
+                                <span id="heroSlideOldPrice" class="block text-xs text-purple-300 line-through">$48.000,00 ARS</span>
+                                <div class="flex items-center gap-2">
+                                    <span id="heroSlidePrice" class="text-2xl md:text-3xl font-black text-emerald-400">$36.999,00 ARS</span>
+                                    <span id="heroSlideDiscount" class="bg-rose-600 text-white text-xs font-black px-2 py-0.5 rounded">-23%</span>
+                                </div>
+                            </div>
 
-                    <!-- Derecha: Mostrador con 3 tarjetas paradas -->
-                    <div class="relative z-10 hidden xl:flex flex-col items-center justify-end self-end">
-                        <div class="flex items-end -space-x-3 mb-2">
-                            <div onclick="filterByBanner('giftcard')" class="cursor-pointer w-20 h-28 rounded-lg bg-gradient-to-b from-[#00439c] to-[#001b47] border border-sky-400/60 p-2 flex flex-col justify-between shadow-xl hover:-translate-y-2 transition">
-                                <span class="text-[7px] font-bold text-sky-200">PSN STORE</span>
-                                <i class="fa-brands fa-playstation text-2xl text-white self-center"></i>
-                                <span class="text-[8px] font-black text-center bg-black/40 rounded py-0.5 text-sky-300">GIFT CARD</span>
+                            <div class="flex items-center gap-2.5">
+                                <button id="heroBuyBtn" onclick="addToCart(11)" class="bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 font-black px-6 py-3 rounded-xl text-xs md:text-sm shadow-xl transition hover:scale-105 flex items-center gap-2">
+                                    <i class="fa-solid fa-cart-plus"></i> Comprar Clave
+                                </button>
+                                <button id="heroDetailBtn" onclick="openProductDetail(11)" class="bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white font-bold px-4 py-3 rounded-xl text-xs md:text-sm transition">
+                                    Ver Ficha
+                                </button>
                             </div>
-                            <div onclick="filterByBanner('giftcard')" class="cursor-pointer w-20 h-32 rounded-lg bg-gradient-to-b from-[#107c10] to-[#062e06] border border-emerald-400/60 p-2 flex flex-col justify-between shadow-2xl z-10 hover:-translate-y-2 transition">
-                                <span class="text-[8px] font-bold text-emerald-200">XBOX</span>
-                                <i class="fa-brands fa-xbox text-2xl text-white self-center"></i>
-                                <span class="text-[8px] font-black text-center bg-black/40 rounded py-0.5 text-emerald-300">ARS / USD</span>
-                            </div>
-                            <div onclick="openProductDetail(4)" class="cursor-pointer w-20 h-28 rounded-lg overflow-hidden border border-pink-400/60 shadow-xl hover:-translate-y-2 transition">
-                                <img src="https://cdn.cloudflare.steamstatic.com/steam/apps/271590/library_600x900.jpg" alt="GTA" class="w-full h-full object-cover">
-                            </div>
-                        </div>
-                        <div class="w-56 h-8 rounded-t-lg bg-gradient-to-r from-amber-900 via-amber-800 to-amber-950 border-t-2 border-amber-500/60 flex items-center justify-around px-3 shadow-inner">
-                            <span class="text-[9px] font-black bg-emerald-500 text-slate-950 px-1.5 py-0.5 rounded">CASHBACK</span>
-                            <span class="text-[10px] font-black text-amber-200 tracking-wider">argon!</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- PANELES DERECHOS: 3 COLUMNAS VERTICALES PROMOCIONALES (5 COLUMNAS) -->
-                <div class="lg:col-span-5 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    
-                    <!-- COLUMNA 1: ¡JUEGOS HASTA -90%*! -->
-                    <div onclick="filterByBanner('discount')" class="cursor-pointer relative min-h-[260px] rounded-2xl overflow-hidden bg-gradient-to-b from-[#21094e] via-[#321175] to-[#13062e] border border-purple-700/60 hover:border-amber-400 p-4 flex flex-col justify-between items-center text-center group transition">
-                        <div class="space-y-0.5 z-10">
-                            <span class="block text-sm font-black uppercase tracking-tight text-white">¡JUEGOS</span>
-                            <span class="block text-2xl font-black uppercase leading-none text-amber-400 drop-shadow">HASTA</span>
-                            <span class="block text-3xl font-black uppercase leading-none text-amber-400 drop-shadow">-90%*!</span>
-                        </div>
-
-                        <div class="relative w-full h-36 mt-2 flex items-center justify-center">
-                            <img src="https://cdn.cloudflare.steamstatic.com/steam/apps/990080/library_600x900.jpg" alt="Hogwarts" class="w-16 h-24 object-cover rounded-md border border-white/40 shadow-lg absolute -translate-x-9 -translate-y-4 -rotate-12 group-hover:scale-105 transition">
-                            <img src="https://cdn.cloudflare.steamstatic.com/steam/apps/1091500/library_600x900.jpg" alt="Cyberpunk" class="w-16 h-24 object-cover rounded-md border border-white/40 shadow-lg absolute translate-x-9 -translate-y-4 rotate-12 group-hover:scale-105 transition">
-                            <img src="https://cdn.cloudflare.steamstatic.com/steam/apps/1245620/library_600x900.jpg" alt="Elden Ring" class="w-16 h-24 object-cover rounded-md border-2 border-emerald-400 shadow-xl absolute -translate-x-7 translate-y-6 -rotate-6 z-10 group-hover:scale-110 transition">
-                            <img src="https://cdn.cloudflare.steamstatic.com/steam/apps/1174180/library_600x900.jpg" alt="RDR2" class="w-16 h-24 object-cover rounded-md border-2 border-amber-400 shadow-xl absolute translate-x-7 translate-y-6 rotate-6 z-10 group-hover:scale-110 transition">
-                        </div>
-                    </div>
-
-                    <!-- COLUMNA 2: EN TENDENCIA: ARGON PACKS (ABRE RULETA DE SOBRES) -->
-                    <div onclick="openPacksModal()" class="cursor-pointer relative min-h-[260px] rounded-2xl overflow-hidden bg-gradient-to-b from-[#1a0638] via-[#4c1284] to-[#230842] border border-fuchsia-600/50 hover:border-fuchsia-400 p-4 flex flex-col justify-between items-center text-center group transition">
-                        <div class="z-10 space-y-1">
-                            <span class="block text-xs font-extrabold uppercase tracking-wider text-fuchsia-300">EN TENDENCIA:</span>
-                            <div class="inline-flex items-center gap-1 bg-fuchsia-950/90 border border-fuchsia-400/60 px-2.5 py-1 rounded-full shadow">
-                                <span class="text-xs font-black tracking-wider text-white">ARGON</span>
-                                <span class="w-3.5 h-3.5 rounded-full bg-gradient-to-tr from-fuchsia-500 to-cyan-400 inline-block"></span>
-                                <span class="text-xs font-black tracking-wider text-fuchsia-300">PACKS</span>
-                            </div>
-                        </div>
-
-                        <div class="relative my-auto flex items-center justify-center pt-3">
-                            <div class="w-14 h-14 rounded-full bg-fuchsia-500/30 blur-xl absolute"></div>
-                            <div class="relative flex items-center">
-                                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-700 to-fuchsia-500 border border-white/30 flex items-center justify-center shadow-lg -mr-3 z-10 group-hover:-rotate-12 transition">
-                                    <i class="fa-solid fa-dragon text-2xl text-amber-300"></i>
-                                </div>
-                                <div class="w-20 h-28 rounded-xl overflow-hidden border-2 border-cyan-300/80 shadow-2xl rotate-6 group-hover:rotate-12 group-hover:scale-105 transition relative">
-                                    <img src="https://cdn.cloudflare.steamstatic.com/steam/apps/2669320/library_600x900.jpg" alt="FC 25 Pack" class="w-full h-full object-cover">
-                                    <span class="absolute top-1 inset-x-1 bg-black/70 text-[8px] font-black text-cyan-300 rounded py-0.5">ABRIR SOBRE</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <span class="text-[10px] font-bold text-amber-300 z-10 underline">¡Haz clic para abrir!</span>
-                    </div>
-
-                    <!-- COLUMNA 3: SOFTWARE BARATO & MEMBRESÍAS -->
-                    <div onclick="filterByBanner('subscription')" class="cursor-pointer relative min-h-[260px] rounded-2xl overflow-hidden bg-gradient-to-b from-white via-slate-100 to-[#1e293b] border border-purple-400/40 hover:border-sky-400 p-4 flex flex-col justify-between items-center text-center group transition">
-                        <div class="z-10 space-y-0.5">
-                            <span class="block text-sm font-black uppercase tracking-tight text-slate-950">SOFTWARE</span>
-                            <span class="inline-block bg-slate-950 text-white font-black text-xs uppercase px-2.5 py-0.5 rounded">
-                                BARATO
-                            </span>
-                        </div>
-
-                        <div class="relative my-auto flex items-center justify-center pt-2">
-                            <div class="w-24 h-28 bg-white rounded-xl shadow-2xl border border-slate-300 p-2.5 flex flex-col justify-between text-left group-hover:scale-105 transition">
-                                <span class="text-[8px] font-bold text-slate-500">Microsoft</span>
-                                <div class="flex items-center gap-1.5">
-                                    <i class="fa-brands fa-windows text-sky-500 text-xl"></i>
-                                    <div class="leading-none">
-                                        <span class="block text-[10px] font-black text-slate-900">Windows 11</span>
-                                        <span class="block text-[8px] font-bold text-sky-600">Professional</span>
-                                    </div>
-                                </div>
-                                <div class="w-full h-8 rounded bg-gradient-to-r from-sky-500 to-blue-700 flex items-center justify-center">
-                                    <span class="text-[9px] font-black text-white">KEY GLOBAL</span>
-                                </div>
-                            </div>
-                            <div class="w-8 h-8 rounded-lg bg-amber-400 border-2 border-slate-950 text-slate-950 flex items-center justify-center font-black text-xs shadow-lg absolute -right-2 bottom-2 rotate-12">
-                                <i class="fa-solid fa-bolt"></i>
-                            </div>
-                        </div>
-
-                        <span class="text-[10px] font-extrabold text-white z-10">Suscripciones & Keys</span>
-                    </div>
-
+                <!-- Columna Derecha: Selector de 4 Destacados (4 columnas) -->
+                <div id="heroSideThumbs" class="lg:col-span-4 flex flex-col justify-between gap-2.5">
+                    <!-- Inyectado dinámicamente desde app.js -->
                 </div>
+            </div>
+
+            <!-- BARRA RÁPIDA DE PLATAFORMAS CON LOGOS -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5">
+                <button onclick="quickFilterPlatform('Steam')" class="bg-[#1c0e42] hover:bg-[#28155c] border border-purple-800/70 hover:border-sky-400 p-3 rounded-xl flex items-center justify-center gap-2.5 transition group">
+                    <i class="fa-brands fa-steam text-xl text-sky-400 group-hover:scale-110 transition"></i>
+                    <span class="text-xs font-bold text-white">Steam</span>
+                </button>
+                <button onclick="quickFilterPlatform('PlayStation')" class="bg-[#1c0e42] hover:bg-[#28155c] border border-purple-800/70 hover:border-blue-400 p-3 rounded-xl flex items-center justify-center gap-2.5 transition group">
+                    <i class="fa-brands fa-playstation text-xl text-blue-400 group-hover:scale-110 transition"></i>
+                    <span class="text-xs font-bold text-white">PlayStation</span>
+                </button>
+                <button onclick="quickFilterPlatform('Xbox')" class="bg-[#1c0e42] hover:bg-[#28155c] border border-purple-800/70 hover:border-emerald-400 p-3 rounded-xl flex items-center justify-center gap-2.5 transition group">
+                    <i class="fa-brands fa-xbox text-xl text-emerald-400 group-hover:scale-110 transition"></i>
+                    <span class="text-xs font-bold text-white">Xbox Live</span>
+                </button>
+                <button onclick="quickFilterPlatform('Nintendo')" class="bg-[#1c0e42] hover:bg-[#28155c] border border-purple-800/70 hover:border-rose-400 p-3 rounded-xl flex items-center justify-center gap-2.5 transition group">
+                    <i class="fa-solid fa-gamepad text-xl text-rose-400 group-hover:scale-110 transition"></i>
+                    <span class="text-xs font-bold text-white">Nintendo</span>
+                </button>
+                <button onclick="quickFilterPlatform('Roblox')" class="bg-[#1c0e42] hover:bg-[#28155c] border border-purple-800/70 hover:border-amber-400 p-3 rounded-xl flex items-center justify-center gap-2.5 transition group">
+                    <i class="fa-solid fa-cubes text-xl text-amber-400 group-hover:scale-110 transition"></i>
+                    <span class="text-xs font-bold text-white">Roblox & V-Bucks</span>
+                </button>
+                <button onclick="openPacksModal()" class="bg-gradient-to-r from-purple-900/80 to-fuchsia-900/80 hover:from-purple-800 hover:to-fuchsia-800 border border-fuchsia-500/50 p-3 rounded-xl flex items-center justify-center gap-2.5 transition group">
+                    <i class="fa-solid fa-box-open text-xl text-amber-300 group-hover:scale-110 transition"></i>
+                    <span class="text-xs font-black text-white">Cofres Misteriosos</span>
+                </button>
             </div>
 
             <!-- SECCIÓN OFERTAS FLASH CON TEMPORIZADOR EN VIVO -->
@@ -317,8 +260,8 @@
                 </div>
             </div>
 
-            <!-- FILTROS Y CATEGORÍAS -->
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#1d0f42] p-4 rounded-2xl border border-purple-800/60">
+            <!-- FILTROS, CATEGORÍAS Y DESLIZADOR DE PRESUPUESTO -->
+            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-[#1d0f42] p-4 rounded-2xl border border-purple-800/60">
                 <div class="flex flex-wrap gap-2">
                     <button onclick="setCategory('all', this)" class="cat-btn active-cat px-4 py-2 rounded-xl text-xs font-bold transition">Todos</button>
                     <button onclick="setCategory('game', this)" class="cat-btn px-4 py-2 rounded-xl text-xs font-bold transition">Juegos PC / Consola</button>
@@ -327,8 +270,16 @@
                     <button onclick="setCategory('currency', this)" class="cat-btn px-4 py-2 rounded-xl text-xs font-bold transition">Monedas Virtuales</button>
                     <button onclick="setCategory('subscription', this)" class="cat-btn px-4 py-2 rounded-xl text-xs font-bold transition">Suscripciones</button>
                 </div>
-                <div class="w-full md:w-auto">
-                    <select id="sortSelect" onchange="filterProducts()" class="w-full md:w-auto bg-[#2a175e] border border-purple-700/60 text-xs text-white font-semibold rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-fuchsia-400">
+
+                <div class="flex flex-wrap items-center gap-4 w-full lg:w-auto justify-between lg:justify-end">
+                    <!-- Filtro de Precio Máximo -->
+                    <div class="flex items-center gap-2.5 bg-[#2a175e] border border-purple-700/60 px-3.5 py-2 rounded-xl">
+                        <span class="text-[11px] text-purple-200 font-semibold">Precio Máx:</span>
+                        <input type="range" id="maxPriceSlider" min="5000" max="75000" step="1000" value="75000" oninput="filterProducts()" class="accent-fuchsia-500 w-24 cursor-pointer">
+                        <span id="maxPriceLabel" class="text-xs font-black text-emerald-400">Sin límite</span>
+                    </div>
+
+                    <select id="sortSelect" onchange="filterProducts()" class="bg-[#2a175e] border border-purple-700/60 text-xs text-white font-semibold rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-fuchsia-400">
                         <option value="featured">Ordenar: Destacados</option>
                         <option value="price-asc">Precio: Menor a Mayor</option>
                         <option value="price-desc">Precio: Mayor a Menor</option>
@@ -362,8 +313,8 @@
                                 </div>
                             </div>
                             <div>
-                                <span class="font-bold text-base text-white block">Cartera Argon</span>
-                                <span class="text-xs text-purple-200/80">Paga con el dinero de tu cartera Argon</span>
+                                <span class="font-bold text-base text-white block">Cartera Argon (<span id="checkoutWalletAvailable">$0,00 ARS</span>)</span>
+                                <span class="text-xs text-purple-200/80">Paga con el dinero de tu cartera Argon o combínalo con tarjeta</span>
                             </div>
                         </div>
                         <input type="radio" name="paymentMethod" value="wallet" checked class="eneba-radio">
@@ -504,7 +455,7 @@
                             </div>
                         </div>
 
-                        <!-- Dorso de la tarjeta (se muestra al enfocar CVV) -->
+                        <!-- Dorso de la tarjeta -->
                         <div class="card-3d-back bg-gradient-to-br from-[#1e1b4b] via-[#3b188f] to-[#12092b] border border-fuchsia-400/40 rounded-2xl py-5 flex flex-col justify-between shadow-2xl">
                             <div class="w-full h-10 bg-slate-950"></div>
                             <div class="px-5 space-y-1">
@@ -620,6 +571,35 @@
 
     </main>
 
+    <!-- MODAL CARTERA ARGON (EMPIEZA EN $0.00 + CANJE DE CÓDIGO DE SALDO) -->
+    <div id="walletModal" class="fixed inset-0 z-50 flex items-center justify-center hidden px-4">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeWalletModal()"></div>
+        <div class="relative bg-[#1d0f42] border border-purple-700 p-6 md:p-8 rounded-2xl w-full max-w-md shadow-2xl space-y-5 z-10">
+            <div class="flex justify-between items-center border-b border-purple-800 pb-3">
+                <h3 class="font-black text-lg flex items-center gap-2 text-emerald-400">
+                    <i class="fa-solid fa-wallet"></i> Mi Cartera Argon
+                </h3>
+                <button onclick="closeWalletModal()" class="text-purple-300 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <div class="bg-gradient-to-br from-[#2a1463] to-[#140830] border border-emerald-500/30 rounded-2xl p-5 text-center space-y-1">
+                <span class="text-xs text-purple-300 uppercase font-bold tracking-wider">Saldo Disponible</span>
+                <div id="walletModalBalance" class="text-3xl font-black text-emerald-400">$0,00 ARS</div>
+                <p class="text-[11px] text-purple-300 pt-1">Acumulas hasta un 10% de Cashback automático en cada compra.</p>
+            </div>
+
+            <div class="space-y-2">
+                <label class="block text-xs font-bold text-purple-200">Canjear Código de Regalo Argon</label>
+                <div class="flex gap-2">
+                    <input type="text" id="giftCodeInput" placeholder="Código de regalo" class="flex-1 bg-[#2a175e] border border-purple-700 rounded-xl px-3.5 py-2.5 text-xs text-white uppercase focus:outline-none focus:border-emerald-400">
+                    <button onclick="redeemWalletCode()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-4 py-2.5 rounded-xl text-xs transition">
+                        Canjear
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL DE VISTA DETALLADA DE PRODUCTO -->
     <div id="productDetailModal" class="fixed inset-0 z-50 flex items-center justify-center hidden px-4 py-6 overflow-y-auto">
         <div class="fixed inset-0 bg-black/80 backdrop-blur-sm" onclick="closeProductDetail()"></div>
@@ -635,14 +615,13 @@
                     <i class="fa-solid fa-dragon text-2xl text-amber-400"></i>
                     <div>
                         <h3 class="font-black text-xl text-white">Argon Mystery Packs</h3>
-                        <p class="text-xs text-purple-300">Elige un sobre misterioso y gana una clave digital aleatoria garantizada al instante</p>
+                        <p class="text-xs text-purple-300">Elige un cofre misterioso y gana una clave digital aleatoria garantizada al instante</p>
                     </div>
                 </div>
                 <button onclick="closePacksModal()" class="text-purple-300 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <!-- Pack Bronce -->
                 <div class="bg-gradient-to-b from-[#2a175e] to-[#160a36] border border-amber-700/60 rounded-2xl p-5 text-center space-y-3 flex flex-col justify-between">
                     <div class="w-16 h-20 mx-auto rounded-xl bg-gradient-to-tr from-amber-800 to-amber-500 flex items-center justify-center shadow-lg">
                         <i class="fa-solid fa-box-open text-2xl text-white"></i>
@@ -652,14 +631,13 @@
                         <p class="text-[11px] text-purple-200 mt-1">Juegos Indie, DLCs o Tarjetas de $10 USD.</p>
                     </div>
                     <div>
-                        <span class="block text-lg font-black text-white mb-2">$8.500,00 ARS</span>
+                        <span class="block text-lg font-black text-white mb-2" data-pack-price="8500">$8.500,00 ARS</span>
                         <button onclick="spinMysteryPack('Bronce', 8500)" class="w-full bg-amber-600 hover:bg-amber-500 text-slate-950 font-black py-2.5 rounded-xl text-xs transition">
                             Abrir Sobre
                         </button>
                     </div>
                 </div>
 
-                <!-- Pack Oro -->
                 <div class="bg-gradient-to-b from-[#3b188f] to-[#160a36] border-2 border-amber-400 rounded-2xl p-5 text-center space-y-3 flex flex-col justify-between relative shadow-xl">
                     <span class="absolute -top-2.5 inset-x-8 bg-amber-400 text-slate-950 font-black text-[10px] py-0.5 rounded-full uppercase">Más Popular</span>
                     <div class="w-16 h-20 mx-auto rounded-xl bg-gradient-to-tr from-amber-500 to-yellow-300 flex items-center justify-center shadow-lg">
@@ -670,14 +648,13 @@
                         <p class="text-[11px] text-purple-200 mt-1">Juegos AAA (GTA V, RE4, Palworld, Hogwarts).</p>
                     </div>
                     <div>
-                        <span class="block text-lg font-black text-white mb-2">$18.900,00 ARS</span>
+                        <span class="block text-lg font-black text-white mb-2" data-pack-price="18900">$18.900,00 ARS</span>
                         <button onclick="spinMysteryPack('Oro', 18900)" class="w-full bg-amber-400 hover:bg-amber-300 text-slate-950 font-black py-2.5 rounded-xl text-xs transition">
                             Abrir Sobre
                         </button>
                     </div>
                 </div>
 
-                <!-- Pack Diamante -->
                 <div class="bg-gradient-to-b from-[#4c1284] to-[#160a36] border border-cyan-400/70 rounded-2xl p-5 text-center space-y-3 flex flex-col justify-between">
                     <div class="w-16 h-20 mx-auto rounded-xl bg-gradient-to-tr from-fuchsia-500 to-cyan-400 flex items-center justify-center shadow-lg">
                         <i class="fa-solid fa-gem text-2xl text-white"></i>
@@ -687,7 +664,7 @@
                         <p class="text-[11px] text-purple-200 mt-1">Lanzamientos Top (FC 25, Wukong, Elden Ring, PSN $50).</p>
                     </div>
                     <div>
-                        <span class="block text-lg font-black text-white mb-2">$32.000,00 ARS</span>
+                        <span class="block text-lg font-black text-white mb-2" data-pack-price="32000">$32.000,00 ARS</span>
                         <button onclick="spinMysteryPack('Diamante', 32000)" class="w-full bg-gradient-to-r from-fuchsia-500 to-cyan-400 hover:opacity-95 text-slate-950 font-black py-2.5 rounded-xl text-xs transition">
                             Abrir Sobre
                         </button>
@@ -695,7 +672,6 @@
                 </div>
             </div>
 
-            <!-- Resultado de la ruleta -->
             <div id="packSpinResult" class="hidden bg-[#140930] border border-emerald-500/50 rounded-2xl p-5 text-center space-y-3"></div>
         </div>
     </div>
@@ -840,6 +816,17 @@
             </div>
 
             <div id="adminContentSection" class="hidden space-y-5">
+                <!-- Configuración de Base de Datos Remota (Webhook / Firebase / API) -->
+                <div class="bg-[#160a36] border border-purple-800 p-3.5 rounded-xl space-y-2">
+                    <label class="block text-xs font-bold text-amber-400">
+                        <i class="fa-solid fa-cloud-arrow-up mr-1"></i> URL de Base de Datos en la Nube / Webhook (Opcional)
+                    </label>
+                    <div class="flex gap-2">
+                        <input type="url" id="webhookUrlInput" placeholder="https://discord.com/api/webhooks/... o https://webhook.site/..." class="flex-1 bg-[#210f4d] border border-purple-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none">
+                        <button onclick="saveWebhookUrl()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs">Guardar URL</button>
+                    </div>
+                </div>
+
                 <!-- Creador de nuevos productos en vivo -->
                 <div class="bg-[#150932] border border-purple-800 p-4 rounded-xl space-y-3">
                     <h4 class="font-black text-xs text-amber-400 uppercase tracking-wider">
@@ -865,7 +852,7 @@
                 </div>
 
                 <div class="flex flex-wrap justify-between items-center gap-2 text-xs">
-                    <span class="text-emerald-400 font-bold">Historial de Operaciones (<span id="dbCountBadge">0</span>)</span>
+                    <span class="text-emerald-400 font-bold">Registros Guardados (<span id="dbCountBadge">0</span>)</span>
                     <div class="flex gap-2">
                         <button onclick="exportDatabaseJSON()" class="bg-purple-700 hover:bg-purple-600 px-3 py-1.5 rounded-lg text-white font-semibold">Descargar JSON</button>
                         <button onclick="exportDatabaseCSV()" class="bg-purple-700 hover:bg-purple-600 px-3 py-1.5 rounded-lg text-white font-semibold">Descargar CSV</button>
@@ -911,7 +898,7 @@
                 </details>
                 <details class="bg-[#2a175e] p-2.5 rounded-xl border border-purple-700/60">
                     <summary class="font-bold cursor-pointer text-white">¿Cómo funciona el Cashback Argon?</summary>
-                    <p class="text-purple-200 mt-1.5 text-[11px]">Cada compra suma saldo directo a tu Cartera Argon arriba a la derecha para descontar en próximos pedidos.</p>
+                    <p class="text-purple-200 mt-1.5 text-[11px]">Todos empiezan con $0,00 y cada compra acredita saldo automático en tu Cartera Argon para futuras órdenes.</p>
                 </details>
             </div>
         </div>
