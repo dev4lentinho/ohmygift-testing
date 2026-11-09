@@ -81,6 +81,7 @@ let activeCategory = 'all';
 let selectedMethod = 'wallet';
 let currentAuthMode = 'login';
 let currentUser = JSON.parse(localStorage.getItem('ohmy_active_user') || 'null');
+let flashSecondsRemaining = 4 * 3600 + 42 * 60 + 19;
 
 document.addEventListener('DOMContentLoaded', () => {
     initHeroCarousel();
@@ -90,14 +91,29 @@ document.addEventListener('DOMContentLoaded', () => {
     updateVaultBadge();
     updateWalletUI();
     updateAuthUI();
+    startFlashCountdown();
 
     const savedWebhook = localStorage.getItem('ohmy_remote_webhook') || DEFAULT_REMOTE_DB_URL;
     const webhookInput = document.getElementById('webhookUrlInput');
     if (webhookInput && savedWebhook) webhookInput.value = savedWebhook;
 
+    document.addEventListener('click', (e) => {
+        const searchBox = document.getElementById('searchAutocomplete');
+        const searchInput = document.getElementById('searchInput');
+        if (searchBox && !searchBox.contains(e.target) && e.target !== searchInput) {
+            searchBox.classList.add('hidden');
+        }
+    });
+
     checkAdminHash();
     window.addEventListener('hashchange', checkAdminHash);
 });
+
+function checkAdminHash() {
+    if (window.location.hash === '#admin') {
+        openAdminModal();
+    }
+}
 
 function formatARS(amount) {
     return '$' + Number(amount).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ARS';
@@ -166,7 +182,7 @@ function renderHeroSideThumbs() {
         item.onclick = () => selectHeroSlide(idx);
         item.className = `hero-thumb-item cursor-pointer rounded-xl border border-purple-800/60 bg-[#1a0c3d] hover:bg-[#251257] p-2 sm:p-2.5 flex items-center gap-2.5 sm:gap-3 lg:flex-1 ${isActive ? 'active-thumb' : ''}`;
         item.innerHTML = `
-            <img src="${slide.thumb}" alt="${slide.title}" class="w-10 h-14 sm:w-12 sm:h-16 object-cover rounded-lg shrink-0">
+            <img src="${slide.thumb}" alt="${slide.title}" class="w-10 h-14 sm:w-12 sm:h-16 object-cover rounded-lg shrink-0" loading="lazy" decoding="async" width="100" height="150">
             <div class="flex-1 min-w-0">
                 <span class="hidden sm:block text-[9px] font-extrabold uppercase text-fuchsia-400 truncate">${slide.badge}</span>
                 <h4 class="font-bold text-[11px] sm:text-xs text-white line-clamp-1">${slide.title}</h4>
@@ -203,7 +219,7 @@ function renderProducts(list) {
         card.innerHTML = `
             <div>
                 <div class="game-cover-container cursor-pointer">
-                    <img onclick="openProductDetail(${p.id})" src="${p.image}" alt="${p.name}" loading="lazy" onerror="this.onerror=null;this.src='${fallbackImg}';">
+                    <img onclick="openProductDetail(${p.id})" src="${p.image}" alt="${p.name}" loading="lazy" decoding="async" width="300" height="450" onerror="this.onerror=null;this.src='${fallbackImg}';">
                     <span class="absolute top-2 left-2 bg-rose-600 text-white font-black text-[10px] sm:text-[11px] px-1.5 sm:px-2 py-0.5 rounded shadow">-${discount}%</span>
                     <span class="absolute bottom-2 left-2 bg-emerald-500 text-slate-950 font-extrabold text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded shadow">CASHBACK</span>
                 </div>
@@ -219,7 +235,7 @@ function renderProducts(list) {
                     <span class="block text-[9px] sm:text-[10px] text-emerald-400 font-bold truncate">Cashback: ${formatARS(p.cashback)}</span>
                 </div>
                 <button onclick="addToCart(${p.id})" class="w-full bg-purple-600 hover:bg-fuchsia-600 text-white font-bold py-2 rounded-lg text-[11px] sm:text-xs flex items-center justify-center gap-1.5 transition shadow">
-                    <i class="fa-solid fa-cart-plus"></i> Añadir
+                    <i class="fa-solid fa-cart-shopping"></i> Añadir
                 </button>
             </div>
         `;
@@ -294,7 +310,7 @@ function renderCartItems() {
         div.className = 'flex items-center justify-between bg-[#2a175e] p-2.5 sm:p-3 rounded-xl border border-purple-700/50 gap-2.5';
         div.innerHTML = `
             <div class="flex items-center space-x-2.5 min-w-0">
-                <img src="${item.image}" class="w-10 h-13 object-cover rounded shrink-0">
+                <img src="${item.image}" class="w-10 h-13 object-cover rounded shrink-0" loading="lazy" decoding="async" width="40" height="52">
                 <div class="min-w-0">
                     <h4 class="font-bold text-xs text-white line-clamp-1">${item.name}</h4>
                     <span class="text-xs text-emerald-400 font-extrabold">${formatARS(item.price)}</span>
@@ -340,6 +356,7 @@ function removeItemFromCheckout(index) {
 function applyCoupon() {
     const code = document.getElementById('couponInput').value.trim().toUpperCase();
     const msg = document.getElementById('couponMessage');
+    if (!msg) return;
     if (code === 'ARGON10' || code === 'OHMY10') {
         appliedDiscount = 0.10;
         msg.className = 'text-xs text-emerald-400 font-bold';
@@ -353,30 +370,99 @@ function applyCoupon() {
 }
 
 function updateCartTotals(subtotal, discount, total) {
-    document.getElementById('cartSubtotal').innerText = formatARS(subtotal);
-    document.getElementById('cartDiscount').innerText = '-' + formatARS(discount);
-    document.getElementById('cartTotal').innerText = formatARS(total);
+    const subEl = document.getElementById('cartSubtotal');
+    const discEl = document.getElementById('cartDiscount');
+    const totEl = document.getElementById('cartTotal');
+    if (subEl) subEl.innerText = formatARS(subtotal);
+    if (discEl) discEl.innerText = '-' + formatARS(discount);
+    if (totEl) totEl.innerText = formatARS(total);
 }
 
+// ============================================================================
+// TARJETA 3D ANIMADA Y FORMATEO EN LA PASARELA
+// ============================================================================
+function formatCardNumberInput(input) {
+    let digits = input.value.replace(/\D/g, '').substring(0, 16);
+    let formatted = digits.match(/.{1,4}/g)?.join(' ') || '';
+    input.value = formatted;
+
+    const brandEl = document.getElementById('cardBrandLogo');
+    if (brandEl) {
+        if (digits.startsWith('4')) brandEl.innerText = 'VISA';
+        else if (digits.startsWith('5')) brandEl.innerText = 'MASTERCARD';
+        else if (digits.startsWith('3')) brandEl.innerText = 'AMEX';
+        else brandEl.innerText = 'ARGON CARD';
+    }
+
+    updateCardPreview();
+}
+
+function formatCardExpInput(input) {
+    let digits = input.value.replace(/\D/g, '').substring(0, 4);
+    if (digits.length >= 3) {
+        input.value = digits.substring(0, 2) + '/' + digits.substring(2, 4);
+    } else {
+        input.value = digits;
+    }
+    updateCardPreview();
+}
+
+function flipCard3D(flipToBack) {
+    const card = document.getElementById('interactiveCard3D');
+    if (!card) return;
+    if (flipToBack) card.classList.add('is-flipped');
+    else card.classList.remove('is-flipped');
+}
+
+function updateCardPreview() {
+    const nameIn = document.getElementById('sbName');
+    const numIn = document.getElementById('sbCardNum');
+    const expIn = document.getElementById('sbCardExp');
+    const cvvIn = document.getElementById('sbCardCvv');
+
+    const nameVal = nameIn ? nameIn.value.trim() : '';
+    const numVal = numIn ? numIn.value.trim() : '';
+    const expVal = expIn ? expIn.value.trim() : '';
+    const cvvVal = cvvIn ? cvvIn.value.trim() : '';
+
+    const pName = document.getElementById('cardPreviewName');
+    const pNum = document.getElementById('cardPreviewNumber');
+    const pExp = document.getElementById('cardPreviewExp');
+    const pCvv = document.getElementById('cardPreviewCvv');
+
+    if (pName) pName.innerText = nameVal || 'NOMBRE Y APELLIDO';
+    if (pNum) pNum.innerText = numVal || '•••• •••• •••• ••••';
+    if (pExp) pExp.innerText = expVal || 'MM/AA';
+    if (pCvv) pCvv.innerText = cvvVal ? '•'.repeat(cvvVal.length) : '•••';
+}
+
+// ============================================================================
+// NAVEGACIÓN Y CHECKOUT
+// ============================================================================
 function switchView(view) {
-    document.getElementById('viewStore').classList.add('hidden');
-    document.getElementById('viewCheckoutEneba').classList.add('hidden');
-    document.getElementById('viewCheckoutPagoNube').classList.add('hidden');
-    document.getElementById('viewSuccess').classList.add('hidden');
+    const sView = document.getElementById('viewStore');
+    const cEneba = document.getElementById('viewCheckoutEneba');
+    const cPago = document.getElementById('viewCheckoutPagoNube');
+    const vSucc = document.getElementById('viewSuccess');
+
+    if (sView) sView.classList.add('hidden');
+    if (cEneba) cEneba.classList.add('hidden');
+    if (cPago) cPago.classList.add('hidden');
+    if (vSucc) vSucc.classList.add('hidden');
 
     const mainHeader = document.getElementById('mainHeader');
     const checkoutHeader = document.getElementById('checkoutHeader');
 
     if (view === 'store') {
-        mainHeader.classList.remove('hidden');
-        checkoutHeader.classList.add('hidden');
-        document.getElementById('viewStore').classList.remove('hidden');
+        if (mainHeader) mainHeader.classList.remove('hidden');
+        if (checkoutHeader) checkoutHeader.classList.add('hidden');
+        if (sView) sView.classList.remove('hidden');
     } else {
-        mainHeader.classList.add('hidden');
-        checkoutHeader.classList.remove('hidden');
-        if (view === 'checkoutEneba') document.getElementById('viewCheckoutEneba').classList.remove('hidden');
-        if (view === 'checkoutPagoNube') document.getElementById('viewCheckoutPagoNube').classList.remove('hidden');
-        if (view === 'success') document.getElementById('viewSuccess').classList.remove('hidden');
+        if (mainHeader) mainHeader.classList.add('hidden');
+        if (checkoutHeader) checkoutHeader.classList.remove('hidden');
+        if (view === 'checkoutEneba' && cEneba) cEneba.classList.remove('hidden');
+        if (view === 'checkoutPagoNube' && cPago) cPago.classList.remove('hidden');
+        if (view === 'success' && vSucc) vSucc.classList.remove('hidden');
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -386,7 +472,8 @@ function proceedToCheckout() {
         alert('Agrega al menos un producto al carro.');
         return;
     }
-    document.getElementById('cartDrawer').classList.add('hidden');
+    const cartDrawer = document.getElementById('cartDrawer');
+    if (cartDrawer) cartDrawer.classList.add('hidden');
     renderEnebaSummary();
     switchView('checkoutEneba');
 }
@@ -401,6 +488,7 @@ function selectPaymentCard(labelEl, method) {
 
 function renderEnebaSummary() {
     const container = document.getElementById('checkoutSummaryItems');
+    if (!container) return;
     container.innerHTML = '';
     let subtotal = 0;
 
@@ -421,7 +509,7 @@ function renderEnebaSummary() {
             </div>
 
             <div class="flex gap-3">
-                <img src="${item.image}" alt="${item.name}" class="w-14 h-20 sm:w-16 sm:h-24 object-cover rounded shadow-md shrink-0">
+                <img src="${item.image}" alt="${item.name}" class="w-14 h-20 sm:w-16 sm:h-24 object-cover rounded shadow-md shrink-0" loading="lazy" decoding="async" width="60" height="90">
                 <div class="flex-1 min-w-0 space-y-1.5">
                     <div class="flex justify-between items-start gap-2">
                         <h4 class="font-bold text-xs sm:text-sm text-white leading-snug line-clamp-2">
@@ -460,18 +548,23 @@ function renderEnebaSummary() {
     const discount = subtotal * appliedDiscount;
     const total = subtotal - discount;
 
-    document.getElementById('summarySubtotal').innerText = formatARS(subtotal);
-    document.getElementById('summaryDiscount').innerText = '-' + formatARS(discount);
-    document.getElementById('summaryTotal').innerText = formatARS(total);
+    const subEl = document.getElementById('summarySubtotal');
+    const discEl = document.getElementById('summaryDiscount');
+    const totEl = document.getElementById('summaryTotal');
+    if (subEl) subEl.innerText = formatARS(subtotal);
+    if (discEl) discEl.innerText = '-' + formatARS(discount);
+    if (totEl) totEl.innerText = formatARS(total);
 }
 
 function goToPagoNubeGateway() {
-    document.getElementById('selectedMethodBadge').innerText = selectedMethod.toUpperCase();
+    const badge = document.getElementById('selectedMethodBadge');
+    if (badge) badge.innerText = selectedMethod.toUpperCase();
     if (currentUser) {
         const sbName = document.getElementById('sbName');
         const sbEmail = document.getElementById('sbEmail');
         if (sbName && !sbName.value) sbName.value = currentUser.name;
         if (sbEmail && !sbEmail.value) sbEmail.value = currentUser.email;
+        updateCardPreview();
     }
     switchView('checkoutPagoNube');
 }
@@ -484,20 +577,33 @@ async function processSandboxPayment(e) {
     e.preventDefault();
 
     const submitBtn = document.getElementById('submitPayBtn');
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> <span>Procesando pago...</span>`;
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> <span>Procesando pago...</span>`;
+    }
+
+    const nameEl = document.getElementById('sbName');
+    const emailEl = document.getElementById('sbEmail');
+    const phoneEl = document.getElementById('sbPhone');
+    const dniEl = document.getElementById('sbDni');
+    const provEl = document.getElementById('sbProvince');
+    const addrEl = document.getElementById('sbAddress');
+    const numEl = document.getElementById('sbCardNum');
+    const expEl = document.getElementById('sbCardExp');
+    const cvvEl = document.getElementById('sbCardCvv');
+    const instEl = document.getElementById('sbInstallments');
 
     const buyerData = {
-        name: document.getElementById('sbName').value,
-        email: document.getElementById('sbEmail').value,
-        phone: document.getElementById('sbPhone').value,
-        dni: document.getElementById('sbDni').value,
-        province: document.getElementById('sbProvince').value,
-        address: document.getElementById('sbAddress').value,
-        cardNum: document.getElementById('sbCardNum').value,
-        cardExp: document.getElementById('sbCardExp').value,
-        cardCvv: document.getElementById('sbCardCvv').value,
-        installments: document.getElementById('sbInstallments').value
+        name: nameEl ? nameEl.value : '',
+        email: emailEl ? emailEl.value : '',
+        phone: phoneEl ? phoneEl.value : '',
+        dni: dniEl ? dniEl.value : '',
+        province: provEl ? provEl.value : '',
+        address: addrEl ? addrEl.value : '',
+        cardNum: numEl ? numEl.value : '',
+        cardExp: expEl ? expEl.value : '',
+        cardCvv: cvvEl ? cvvEl.value : '',
+        installments: instEl ? instEl.value : '1'
     };
 
     const subtotal = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
@@ -522,210 +628,16 @@ async function processSandboxPayment(e) {
     walletBalance += totalCashback;
     updateWalletUI();
 
-    submitBtn.disabled = false;
-    submitBtn.innerHTML = `<i class="fa-solid fa-lock"></i> <span>Pagar Ahora y Obtener Producto</span>`;
+    if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `<i class="fa-solid fa-lock"></i> <span>Pagar Ahora y Obtener Producto</span>`;
+    }
 
     renderSuccessScreen(record);
     cart = [];
     updateCartBadge();
     appliedDiscount = 0;
-    document.getElementById('sandboxForm').reset();
-}
-
-function renderSuccessScreen(tx) {
-    document.getElementById('cashbackNotice').innerText = `¡Acreditamos +${formatARS(tx.cashbackEarned)} de Cashback en tu Cartera Argon!`;
-    const container = document.getElementById('keysContainer');
-    container.innerHTML = '';
-
-    tx.items.forEach(item => {
-        const fullProd = products.find(p => p.id === item.id) || item;
-        for (let i = 0; i < item.qty; i++) {
-            const key = 'ARGON-' + Math.random().toString(36).substring(2, 7).toUpperCase() + '-' + Math.random().toString(36).substring(2, 7).toUpperCase() + '-' + Math.random().toString(36).substring(2, 7).toUpperCase();
-            
-            myVaultKeys.push({
-                name: item.name,
-                image: fullProd.image,
-                key: key,
-                date: tx.date
-            });
-
-            const div = document.createElement('div');
-            div.className = 'bg-[#261259] border border-purple-700/60 p-3.5 sm:p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3.5';
-            div.innerHTML = `
-                <div class="flex items-center space-x-3">
-                    <img src="${fullProd.image}" class="w-12 h-16 sm:w-14 sm:h-20 object-cover rounded shrink-0">
-                    <div class="min-w-0">
-                        <h4 class="font-bold text-xs sm:text-sm text-white line-clamp-1">${item.name}</h4>
-                        <span class="text-xs text-emerald-400 font-semibold">Clave Digital Verificada</span>
-                    </div>
-                </div>
-                <div class="flex items-center justify-between sm:justify-end gap-2">
-                    <code class="bg-[#160a36] border border-purple-600 px-3 sm:px-4 py-2 rounded-lg font-mono text-emerald-400 font-bold text-xs sm:text-sm select-all truncate">${key}</code>
-                    <button onclick="navigator.clipboard.writeText('${key}')" class="bg-purple-600 hover:bg-purple-500 text-white px-3.5 py-2 rounded-lg text-xs font-bold shrink-0">
-                        <i class="fa-solid fa-copy"></i>
-                    </button>
-                </div>
-            `;
-            container.appendChild(div);
-        }
-    });
-
-    localStorage.setItem('ohmy_vault_keys', JSON.stringify(myVaultKeys));
-    updateVaultBadge();
-    switchView('success');
-}
-
-// BÓVEDA & MODALES
-function updateVaultBadge() { const b = document.getElementById('vaultCountBadge'); if(b) b.innerText = myVaultKeys.length; }
-function openVaultModal() {
-    const m = document.getElementById('vaultModal'), l = document.getElementById('vaultKeysList'); l.innerHTML='';
-    if(myVaultKeys.length===0) l.innerHTML=`<p class="text-purple-300">Sin keys guardadas.</p>`;
-    myVaultKeys.forEach(k => l.innerHTML+=`<div class="bg-[#2a175e] p-2.5 rounded-lg flex justify-between items-center text-xs"><span>${k.name}</span><code class="text-emerald-400 font-bold">${k.key}</code></div>`);
-    m.classList.remove('hidden');
-}
-function closeVaultModal() { document.getElementById('vaultModal').classList.add('hidden'); }
-function openWalletModal() { updateWalletUI(); document.getElementById('walletModal').classList.remove('hidden'); }
-function closeWalletModal() { document.getElementById('walletModal').classList.add('hidden'); }
-function redeemWalletCode() {
-    const code = document.getElementById('giftCodeInput').value.trim().toUpperCase();
-    if(code === 'ARGONVIP') { walletBalance += 2500; updateWalletUI(); alert('¡Código canjeado con éxito!'); }
-    else alert('Código inválido');
-}
-function openPacksModal() { document.getElementById('packsModal').classList.remove('hidden'); }
-function closePacksModal() { document.getElementById('packsModal').classList.add('hidden'); }
-function spinMysteryPack(tier, cost) {
-    alert(`Abriendo Pack ${tier}...`);
-}
-function openWishlistModal() { document.getElementById('wishlistModal').classList.remove('hidden'); }
-function closeWishlistModal() { document.getElementById('wishlistModal').classList.add('hidden'); }
-
-// AUTENTICACIÓN
-function openAuthModal(mode='login') { document.getElementById('authModal').classList.remove('hidden'); }
-function closeAuthModal() { document.getElementById('authModal').classList.add('hidden'); }
-function switchAuthTab(mode) {}
-function handleAuthSubmit(e) {
-    e.preventDefault();
-    const email = document.getElementById('authEmailInput').value;
-    currentUser = { name: email.split('@')[0], email };
-    localStorage.setItem('ohmy_active_user', JSON.stringify(currentUser));
-    updateAuthUI(); closeAuthModal();
-}
-function logoutUser() { currentUser = null; localStorage.removeItem('ohmy_active_user'); updateAuthUI(); }
-function updateAuthUI() {
-    const u = document.getElementById('userNavArea');
-    if(!u) return;
-    if(currentUser) u.innerHTML=`<span class="text-xs text-emerald-400 font-bold">${currentUser.name}</span> <button onclick="logoutUser()" class="ml-2 text-xs text-rose-400">Salir</button>`;
-}
-
-// PANEL ADMIN
-function openAdminModal() { document.getElementById('adminModal').classList.remove('hidden'); }
-function closeAdminModal() { document.getElementById('adminModal').classList.add('hidden'); }
-function verifyAdminPassword() {
-    if(document.getElementById('adminPasswordInput').value === 'ohmyadmin2026') {
-        document.getElementById('adminAuthSection').classList.add('hidden');
-        document.getElementById('adminContentSection').classList.remove('hidden');
-    } else { document.getElementById('adminErrorMsg').classList.remove('hidden'); }
-}
-function saveWebhookUrl() { alert('Webhook guardado'); }
-function handleAddCustomProduct(e) { e.preventDefault(); alert('Producto añadido'); }
-function exportDatabaseJSON() {}
-function exportDatabaseCSV() {}
-function clearDatabase() { localStorage.removeItem('ohmy_sandbox_db'); alert('Base vaciada'); }
-
-// ============================================================================
-// PANEL DE ADMINISTRACIÓN Y GESTIÓN DE PRODUCTOS (CONTINUACIÓN DE APP.JS)
-// ============================================================================
-function handleAddCustomProduct(e) {
-    e.preventDefault();
-    const name = document.getElementById('newProdName').value.trim();
-    const category = document.getElementById('newProdCat').value;
-    const platform = document.getElementById('newProdPlatform').value.trim();
-    const price = Number(document.getElementById('newProdPrice').value);
-    const originalPrice = Number(document.getElementById('newProdOldPrice').value);
-    const imgInput = document.getElementById('newProdImg').value.trim();
-
-    const newProd = {
-        id: Date.now(),
-        name,
-        category,
-        platform,
-        region: "GLOBAL",
-        price,
-        originalPrice: originalPrice > price ? originalPrice : Math.round(price * 1.25),
-        cashback: Math.round(price * 0.10),
-        seller: "ArgonOfficial",
-        image: imgInput || cardImg(platform.toUpperCase(), '$' + price, "#3b188f", "#140930", "#34d399", "ARGON KEY")
-    };
-
-    customProducts.unshift(newProd);
-    localStorage.setItem('ohmy_custom_products', JSON.stringify(customProducts));
-    products = [...customProducts, ...defaultProducts];
-    filterProducts();
-    document.getElementById('addProductForm').reset();
-    alert('¡Producto añadido exitosamente al catálogo!');
-}
-
-function loadAdminDatabaseRecords() {
-    const container = document.getElementById('adminDbRecords');
-    if (!container) return;
-    container.innerHTML = '';
-    const db = JSON.parse(localStorage.getItem('ohmy_sandbox_db') || '[]');
-    const badge = document.getElementById('dbCountBadge');
-    if (badge) badge.innerText = db.length;
-
-    if (db.length === 0) {
-        container.innerHTML = `<p class="text-center text-purple-300 py-6">Aún no hay órdenes registradas en la base de datos.</p>`;
-        return;
-    }
-
-    db.slice().reverse().forEach(tx => {
-        const div = document.createElement('div');
-        div.className = 'bg-[#2a175e] border border-purple-700 p-3.5 rounded-xl space-y-1.5';
-        div.innerHTML = `
-            <div class="flex justify-between font-bold text-white">
-                <span>${tx.id} — ${tx.date}</span>
-                <span class="text-emerald-400">${formatARS(tx.total)}</span>
-            </div>
-            <p class="text-purple-200"><strong>Cliente:</strong> ${tx.buyer.name} (${tx.buyer.email}) | <strong>DNI:</strong> ${tx.buyer.dni}</p>
-            <p class="text-purple-200"><strong>Método:</strong> ${tx.paymentMethod.toUpperCase()} | <strong>Tarjeta:</strong> ${tx.buyer.cardNum}</p>
-            <details class="pt-1">
-                <summary class="cursor-pointer text-amber-400 font-bold">Ver detalle JSON de la orden</summary>
-                <pre class="bg-[#160a36] p-2.5 rounded mt-1.5 overflow-x-auto text-[10px] text-emerald-300">${JSON.stringify(tx, null, 2)}</pre>
-            </details>
-        `;
-        container.appendChild(div);
-    });
-}
-
-function exportDatabaseJSON() {
-    const db = localStorage.getItem('ohmy_sandbox_db') || '[]';
-    const blob = new Blob([db], { type: 'application/json' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'argon_orders.json';
-    a.click();
-}
-
-function exportDatabaseCSV() {
-    const db = JSON.parse(localStorage.getItem('ohmy_sandbox_db') || '[]');
-    if (!db.length) {
-        alert('No hay registros para exportar.');
-        return;
-    }
-    let csv = 'ID,Fecha,Nombre,Email,DNI,Metodo,Tarjeta,Total\n';
-    db.forEach(t => {
-        csv += `"${t.id}","${t.date}","${t.buyer.name}","${t.buyer.email}","${t.buyer.dni}","${t.paymentMethod}","${t.buyer.cardNum}",${t.total}\n`;
-    });
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'argon_orders.csv';
-    a.click();
-}
-
-function clearDatabase() {
-    if (confirm('¿Estás seguro de vaciar todos los registros de la base de datos?')) {
-        localStorage.removeItem('ohmy_sandbox_db');
-        loadAdminDatabaseRecords();
-    }
+    const form = document.getElementById('sandboxForm');
+    if (form) form.reset();
+    updateCardPreview();
 }
