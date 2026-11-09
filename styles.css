@@ -93,6 +93,25 @@ body {
     transform: scale(1.06);
 }
 
+/* Animación suave para las tarjetas flotantes del Banner Vice */
+@keyframes floatSlowLeft {
+    0%, 100% { transform: translateY(0px) rotate(-12deg); }
+    50% { transform: translateY(-7px) rotate(-9deg); }
+}
+
+@keyframes floatSlowRight {
+    0%, 100% { transform: translateY(0px) rotate(6deg); }
+    50% { transform: translateY(-6px) rotate(9deg); }
+}
+
+.floating-card-left {
+    animation: floatSlowLeft 4s ease-in-out infinite;
+}
+
+.floating-card-right {
+    animation: floatSlowRight 4.5s ease-in-out infinite;
+}
+
 /* Scrollbar estética */
 ::-webkit-scrollbar {
     width: 6px;
