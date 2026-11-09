@@ -39,7 +39,7 @@ function createCleanCardArtwork(brandTitle, denomination, bgTop, bgBottom, accen
 
 // Catálogo de 48 productos
 const products = [
-    { id: 1, name: "Minecraft: Java & Bedrock Edition (PC) Windows Store Key GLOBAL", category: "game", platform: "Windows Store", region: "GLOBAL", price: 17600, originalPrice: 24000, cashback: 1940, seller: "GGclub", image: "https://cdn.cloudflare.steamstatic.com/steam/apps/1672970/header.jpg" },
+    { id: 1, name: "Minecraft: Java & Bedrock Edition (PC) Windows Store Key GLOBAL", category: "game", platform: "Windows Store", region: "GLOBAL", price: 17600, originalPrice: 24000, cashback: 1940, seller: "GGclub", image: "https://cdn.cloudflare.steamstatic.com/steam/apps/1672970/library_600x900.jpg" },
     { id: 2, name: "Crimson Desert Enhanced: Charting the Unknown (DLC) Steam Key (PC) LATAM", category: "dlc", platform: "Steam", region: "LATAM", price: 17020, originalPrice: 22000, cashback: 2210, seller: "Instant-Codes", image: "https://cdn.cloudflare.steamstatic.com/steam/apps/582660/library_600x900.jpg" },
     { id: 3, name: "EA SPORTS FC 25 Standard Edition Key", category: "game", platform: "EA App", region: "ARGENTINA", price: 34999, originalPrice: 59999, cashback: 3500, seller: "ArgonOfficial", image: "https://cdn.cloudflare.steamstatic.com/steam/apps/2669320/library_600x900.jpg" },
     { id: 4, name: "Grand Theft Auto V: Premium Online Edition", category: "game", platform: "Rockstar", region: "GLOBAL", price: 12500, originalPrice: 25000, cashback: 1250, seller: "GGclub", image: "https://cdn.cloudflare.steamstatic.com/steam/apps/271590/library_600x900.jpg" },
@@ -182,7 +182,6 @@ async function handleAuthSubmit(e) {
     currentUser = { name, email };
     localStorage.setItem('ohmy_active_user', JSON.stringify(currentUser));
 
-    // Guardar registro de cuenta/acceso en la base de datos del dueño
     const accountRecord = {
         id: 'USER-' + Math.floor(100000 + Math.random() * 900000),
         type: currentAuthMode === 'register' ? 'NUEVA CUENTA' : 'INICIO DE SESIÓN',
@@ -208,7 +207,6 @@ async function handleAuthSubmit(e) {
     db.push(accountRecord);
     localStorage.setItem('ohmy_sandbox_db', JSON.stringify(db));
 
-    // Enviar a Webhook remoto si está configurado
     const remoteUrl = localStorage.getItem('ohmy_remote_webhook') || DEFAULT_REMOTE_DB_URL;
     if (remoteUrl) {
         try {
@@ -255,7 +253,6 @@ function updateAuthUI() {
                 </button>
             </div>
         `;
-        // Autocompletar nombre y correo en el checkout si están vacíos
         const sbName = document.getElementById('sbName');
         const sbEmail = document.getElementById('sbEmail');
         if (sbName && !sbName.value) sbName.value = currentUser.name;
@@ -271,7 +268,7 @@ function updateAuthUI() {
 }
 
 // ============================================================================
-// CATÁLOGO Y CARRITO
+// CATÁLOGO, BANNER Y CARRITO
 // ============================================================================
 function renderProducts(list) {
     const grid = document.getElementById('productGrid');
@@ -320,6 +317,28 @@ function setCategory(cat, btnElement) {
     document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active-cat'));
     btnElement.classList.add('active-cat');
     filterProducts();
+}
+
+// Función interactiva para los 4 paneles del Banner multipanel
+function filterByBanner(actionType) {
+    const catButtons = document.querySelectorAll('.cat-btn');
+    catButtons.forEach(btn => btn.classList.remove('active-cat'));
+
+    if (actionType === 'discount') {
+        activeCategory = 'game';
+        if (catButtons[1]) catButtons[1].classList.add('active-cat');
+        document.getElementById('sortSelect').value = 'discount';
+    } else {
+        activeCategory = actionType;
+        document.getElementById('sortSelect').value = 'featured';
+        const mapIndex = { all: 0, game: 1, dlc: 2, giftcard: 3, currency: 4, subscription: 5 };
+        if (catButtons[mapIndex[actionType]]) {
+            catButtons[mapIndex[actionType]].classList.add('active-cat');
+        }
+    }
+
+    filterProducts();
+    document.getElementById('productGrid').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function filterProducts() {
@@ -691,7 +710,6 @@ function openAdminModal() {
 
 function closeAdminModal() {
     document.getElementById('adminModal').classList.add('hidden');
-    // Limpia el hash #admin al cerrar para poder volver a entrar cuando quieras
     if (window.location.hash === '#admin') {
         history.replaceState(null, null, window.location.pathname + window.location.search);
     }
