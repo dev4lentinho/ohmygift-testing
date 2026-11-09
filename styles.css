@@ -1,54 +1,421 @@
+/* ==========================================================================
+   1. BASE, RESET Y PREVENCIÓN DE DESBORDAMIENTO (MOBILE-FIRST)
+   ========================================================================== */
+:root {
+    --bg-primary: #12092b;
+    --bg-secondary: #190d3a;
+    --bg-card: #1f0f47;
+    --vice-pink: #ec4899;
+    --vice-orange: #f59e0b;
+    --vice-purple: #7e22ce;
+    --vice-cyan: #06b6d4;
+    --neon-emerald: #10b981;
+}
+
 html, body {
-    background-color: #12092b;
+    background-color: var(--bg-primary);
     color: #ffffff;
     max-width: 100%;
     overflow-x: hidden;
+    scroll-behavior: smooth;
     -webkit-tap-highlight-color: transparent;
 }
 
-.no-scrollbar::-webkit-scrollbar { display: none; }
-.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-.cat-btn { background-color: #2a175e; color: #d8b4fe; }
-.cat-btn:hover { background-color: #3b2080; color: #ffffff; }
-.cat-btn.active-cat { background-color: #9333ea; color: #ffffff; box-shadow: 0 4px 14px rgba(147, 51, 234, 0.4); }
-
-.eneba-pay-card {
-    display: flex; align-items: center; justify-content: space-between;
-    background-color: #35167d; border: 2px solid transparent; border-radius: 10px; padding: 12px 14px; cursor: pointer; transition: all 0.2s ease;
+/* Ocultar barra de scroll en carruseles horizontales táctiles */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
 }
-@media (min-width: 640px) { .eneba-pay-card { padding: 18px 22px; } }
-.eneba-pay-card:hover { background-color: #3f1b94; border-color: rgba(168, 85, 247, 0.5); }
-.eneba-pay-card.selected-pay-card { background-color: #3f1b94; border-color: #10b981; }
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Scrollbar personalizada estilo Argon Neon */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #12092b;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #ec4899, #7e22ce);
+    border-radius: 9999px;
+}
+
+/* ==========================================================================
+   2. ESTÉTICA VICE CITY (HERO GTA VI, NEÓN, PALMERAS Y PARTÍCULAS)
+   ========================================================================== */
+#gtaHeroSection {
+    position: relative;
+    background: linear-gradient(135deg, #16042c 0%, #3b0a45 45%, #7c1652 80%, #c2410c 100%);
+    box-shadow: 0 0 45px rgba(236, 72, 153, 0.28), inset 0 0 30px rgba(245, 158, 11, 0.15);
+    isolation: isolate;
+}
+
+/* Sol retro estilo Vice City en el fondo del Hero */
+#gtaHeroSection::before {
+    content: '';
+    position: absolute;
+    top: -15%;
+    right: 8%;
+    width: 280px;
+    height: 280px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, #fde047 0%, #f97316 45%, #ec4899 90%);
+    opacity: 0.22;
+    filter: blur(2px);
+    pointer-events: none;
+    z-index: 0;
+    mask-image: repeating-linear-gradient(
+        to bottom,
+        #000 0px,
+        #000 14px,
+        transparent 14px,
+        transparent 20px
+    );
+    -webkit-mask-image: repeating-linear-gradient(
+        to bottom,
+        #000 0px,
+        #000 14px,
+        transparent 14px,
+        transparent 20px
+    );
+}
+
+/* Rejilla Synthwave sutil en la base del Hero */
+#gtaHeroSection::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: 
+        linear-gradient(to right, rgba(236, 72, 153, 0.12) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(236, 72, 153, 0.12) 1px, transparent 1px);
+    background-size: 36px 36px;
+    mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.65) 0%, transparent 65%);
+    -webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.65) 0%, transparent 65%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Brillo de texto neón */
+.vice-neon-text {
+    text-shadow: 
+        0 0 8px rgba(236, 72, 153, 0.75),
+        0 0 22px rgba(245, 158, 11, 0.45);
+}
+
+/* Partículas suaves flotantes (optimizadas con transform y opacity) */
+.vice-particle {
+    position: absolute;
+    border-radius: 9999px;
+    pointer-events: none;
+    will-change: transform, opacity;
+    animation: floatParticle 6s ease-in-out infinite alternate;
+}
+
+@keyframes floatParticle {
+    0% {
+        transform: translate3d(0, 0, 0) scale(0.9);
+        opacity: 0.25;
+    }
+    100% {
+        transform: translate3d(12px, -22px, 0) scale(1.15);
+        opacity: 0.75;
+    }
+}
+
+/* ==========================================================================
+   3. ANIMACIÓN FLIP / SLIDE PARA LOS NÚMEROS DE LA CUENTA REGRESIVA
+   ========================================================================== */
+#cdDays, #cdHours, #cdMins, #cdSecs {
+    display: inline-block;
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+}
+
+.cd-digit-flip {
+    animation: digitFlipAnim 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes digitFlipAnim {
+    0% {
+        transform: translate3d(0, -45%, 0) rotateX(55deg) scale(0.92);
+        opacity: 0.2;
+    }
+    60% {
+        transform: translate3d(0, 6%, 0) rotateX(-8deg) scale(1.04);
+        opacity: 1;
+    }
+    100% {
+        transform: translate3d(0, 0, 0) rotateX(0deg) scale(1);
+        opacity: 1;
+    }
+}
+
+/* Confeti ligero cuando el contador llega a cero */
+.confetti-piece {
+    position: absolute;
+    width: 8px;
+    height: 14px;
+    border-radius: 2px;
+    pointer-events: none;
+    z-index: 30;
+    will-change: transform, opacity;
+    animation: confettiFall 2.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes confettiFall {
+    0% {
+        transform: translate3d(0, -20px, 0) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translate3d(var(--dx, 40px), 260px, 0) rotate(var(--rot, 540deg));
+        opacity: 0;
+    }
+}
+
+/* ==========================================================================
+   4. TARJETAS 3D TILT (JUEGOS EN TENDENCIA & TOP 10)
+   ========================================================================== */
+.tilt-card {
+    position: relative;
+    transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s ease, border-color 0.22s ease;
+    transform-style: preserve-3d;
+    will-change: transform;
+}
+
+.tilt-card:hover {
+    border-color: rgba(236, 72, 153, 0.85);
+    box-shadow: 0 14px 30px -8px rgba(236, 72, 153, 0.35), 0 0 18px rgba(126, 34, 206, 0.4);
+}
+
+/* Número gigante del Ranking Top 10 */
+.rank-number-badge {
+    font-family: system-ui, -apple-system, sans-serif;
+    font-weight: 900;
+    font-style: italic;
+    line-height: 1;
+    background: linear-gradient(180deg, #ffffff 15%, #f472b6 55%, #7e22ce 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.85));
+}
+
+/* ==========================================================================
+   5. SKELETON LOADERS Y ANIMACIONES SCROLL REVEAL (GPU OPTIMIZED)
+   ========================================================================== */
+.skeleton-box {
+    position: relative;
+    overflow: hidden;
+    background-color: #241154;
+}
+
+.skeleton-box::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(236, 72, 153, 0.16) 50%,
+        transparent 100%
+    );
+    animation: skeletonShimmer 1.4s infinite;
+    will-change: transform;
+}
+
+.skeleton-loaded::after {
+    display: none !important;
+    animation: none !important;
+}
+
+@keyframes skeletonShimmer {
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+/* Animación al hacer scroll para revelar secciones */
+.reveal-on-scroll {
+    opacity: 0;
+    transform: translate3d(0, 24px, 0);
+    transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1), transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, transform;
+}
+
+.reveal-on-scroll.is-visible {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+}
+
+/* ==========================================================================
+   6. BOTONES DE FILTRO, CATÁLOGO, CHECKOUT ENEBA Y TARJETA 3D
+   ========================================================================== */
+.cat-btn, .trend-filter-btn {
+    background-color: #2a175e;
+    color: #d8b4fe;
+    border: 1px solid rgba(147, 51, 234, 0.25);
+}
+
+.cat-btn:hover, .trend-filter-btn:hover {
+    background-color: #3b2080;
+    color: #ffffff;
+    border-color: rgba(236, 72, 153, 0.5);
+}
+
+.cat-btn.active-cat, .trend-filter-btn.active-filter {
+    background: linear-gradient(90deg, #ec4899, #9333ea);
+    color: #ffffff;
+    border-color: #f472b6;
+    box-shadow: 0 4px 15px rgba(236, 72, 153, 0.45);
+}
+
+/* Tarjetas de selección de pago estilo Eneba */
+.eneba-pay-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #35167d;
+    border: 2px solid transparent;
+    border-radius: 12px;
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: transform 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+
+@media (min-width: 640px) {
+    .eneba-pay-card {
+        padding: 18px 22px;
+    }
+}
+
+.eneba-pay-card:hover {
+    background-color: #3f1b94;
+    border-color: rgba(236, 72, 153, 0.55);
+}
+
+.eneba-pay-card.selected-pay-card {
+    background-color: #3f1b94;
+    border-color: #10b981;
+    box-shadow: 0 0 18px rgba(16, 185, 129, 0.25);
+}
 
 .eneba-radio {
-    appearance: none; width: 20px; height: 20px; border: 2px solid #cbd5e1; border-radius: 50%; outline: none; cursor: pointer; position: relative; flex-shrink: 0;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #cbd5e1;
+    border-radius: 50%;
+    outline: none;
+    cursor: pointer;
+    position: relative;
+    flex-shrink: 0;
 }
-@media (min-width: 640px) { .eneba-radio { width: 22px; height: 22px; } }
-.eneba-radio:checked { border-color: #10b981; }
+
+@media (min-width: 640px) {
+    .eneba-radio {
+        width: 22px;
+        height: 22px;
+    }
+}
+
+.eneba-radio:checked {
+    border-color: #10b981;
+}
+
 .eneba-radio:checked::after {
-    content: ''; width: 10px; height: 10px; background-color: #10b981; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    content: '';
+    width: 10px;
+    height: 10px;
+    background-color: #10b981;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
+/* Contenedor de portadas 2:3 con dimensiones estables (Evita CLS) */
 .game-cover-container {
-    aspect-ratio: 2 / 3; width: 100%; overflow: hidden; position: relative; background-color: #1d0f42;
+    aspect-ratio: 2 / 3;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    background-color: #1d0f42;
 }
-.game-cover-container img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.35s ease; }
-.group:hover .game-cover-container img { transform: scale(1.06); }
 
-.hero-thumb-item { position: relative; overflow: hidden; transition: all 0.25s ease; }
-.hero-thumb-item.active-thumb { background-color: #2c1669; border-color: #c084fc; }
+.game-cover-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
+    will-change: transform, opacity;
+}
 
-@keyframes progressFill { from { width: 0%; } to { width: 100%; } }
-.hero-progress-bar { height: 3px; background: linear-gradient(90deg, #f59e0b, #ec4899); animation: progressFill 5s linear forwards; }
+.group:hover .game-cover-container img {
+    transform: scale(1.06);
+}
 
-.card-3d-perspective { perspective: 1000px; height: 185px; }
-@media (min-width: 640px) { .card-3d-perspective { height: 205px; } }
-.card-3d-inner { position: relative; width: 100%; height: 100%; transition: transform 0.65s cubic-bezier(0.4, 0.2, 0.2, 1); transform-style: preserve-3d; }
-.card-3d-inner.is-flipped { transform: rotateY(180deg); }
-.card-3d-front, .card-3d-back { position: absolute; inset: 0; width: 100%; height: 100%; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
-.card-3d-back { transform: rotateY(180deg); }
+/* Tarjeta de Crédito 3D en Pasarela */
+.card-3d-perspective {
+    perspective: 1000px;
+    height: 185px;
+}
 
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #12092b; }
-::-webkit-scrollbar-thumb { background: #4c1d95; border-radius: 9999px; }
+@media (min-width: 640px) {
+    .card-3d-perspective {
+        height: 205px;
+    }
+}
+
+.card-3d-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.65s cubic-bezier(0.4, 0.2, 0.2, 1);
+    transform-style: preserve-3d;
+}
+
+.card-3d-inner.is-flipped {
+    transform: rotateY(180deg);
+}
+
+.card-3d-front,
+.card-3d-back {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+.card-3d-back {
+    transform: rotateY(180deg);
+}
+
+/* ==========================================================================
+   7. ACCESIBILIDAD: RESPETO A PREFERS-REDUCED-MOTION
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+    .reveal-on-scroll {
+        opacity: 1 !important;
+        transform: none !important;
+    }
+    .tilt-card {
+        transform: none !important;
+    }
+}
