@@ -112,6 +112,38 @@ body {
     animation: floatSlowRight 4.5s ease-in-out infinite;
 }
 
+/* Tarjeta de Crédito 3D Interactiva */
+.card-3d-perspective {
+    perspective: 1000px;
+    height: 205px;
+}
+
+.card-3d-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.65s cubic-bezier(0.4, 0.2, 0.2, 1);
+    transform-style: preserve-3d;
+}
+
+.card-3d-inner.is-flipped {
+    transform: rotateY(180deg);
+}
+
+.card-3d-front,
+.card-3d-back {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+.card-3d-back {
+    transform: rotateY(180deg);
+}
+
 /* Scrollbar estética */
 ::-webkit-scrollbar {
     width: 6px;
