@@ -10,21 +10,45 @@ html, body {
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
 .cat-btn { background-color: #2a175e; color: #d8b4fe; }
-.cat-btn.active-cat { background-color: #9333ea; color: #ffffff; }
+.cat-btn:hover { background-color: #3b2080; color: #ffffff; }
+.cat-btn.active-cat { background-color: #9333ea; color: #ffffff; box-shadow: 0 4px 14px rgba(147, 51, 234, 0.4); }
 
 .eneba-pay-card {
     display: flex; align-items: center; justify-content: space-between;
-    background-color: #35167d; border-radius: 10px; padding: 12px 14px; cursor: pointer;
+    background-color: #35167d; border: 2px solid transparent; border-radius: 10px; padding: 12px 14px; cursor: pointer; transition: all 0.2s ease;
 }
-.eneba-pay-card.selected-pay-card { background-color: #3f1b94; border: 2px solid #10b981; }
+@media (min-width: 640px) { .eneba-pay-card { padding: 18px 22px; } }
+.eneba-pay-card:hover { background-color: #3f1b94; border-color: rgba(168, 85, 247, 0.5); }
+.eneba-pay-card.selected-pay-card { background-color: #3f1b94; border-color: #10b981; }
+
+.eneba-radio {
+    appearance: none; width: 20px; height: 20px; border: 2px solid #cbd5e1; border-radius: 50%; outline: none; cursor: pointer; position: relative; flex-shrink: 0;
+}
+@media (min-width: 640px) { .eneba-radio { width: 22px; height: 22px; } }
+.eneba-radio:checked { border-color: #10b981; }
+.eneba-radio:checked::after {
+    content: ''; width: 10px; height: 10px; background-color: #10b981; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+}
 
 .game-cover-container {
     aspect-ratio: 2 / 3; width: 100%; overflow: hidden; position: relative; background-color: #1d0f42;
 }
-.game-cover-container img { width: 100%; height: 100%; object-fit: cover; }
+.game-cover-container img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.35s ease; }
+.group:hover .game-cover-container img { transform: scale(1.06); }
 
+.hero-thumb-item { position: relative; overflow: hidden; transition: all 0.25s ease; }
 .hero-thumb-item.active-thumb { background-color: #2c1669; border-color: #c084fc; }
 
-::-webkit-scrollbar { width: 5px; height: 5px; }
+@keyframes progressFill { from { width: 0%; } to { width: 100%; } }
+.hero-progress-bar { height: 3px; background: linear-gradient(90deg, #f59e0b, #ec4899); animation: progressFill 5s linear forwards; }
+
+.card-3d-perspective { perspective: 1000px; height: 185px; }
+@media (min-width: 640px) { .card-3d-perspective { height: 205px; } }
+.card-3d-inner { position: relative; width: 100%; height: 100%; transition: transform 0.65s cubic-bezier(0.4, 0.2, 0.2, 1); transform-style: preserve-3d; }
+.card-3d-inner.is-flipped { transform: rotateY(180deg); }
+.card-3d-front, .card-3d-back { position: absolute; inset: 0; width: 100%; height: 100%; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.card-3d-back { transform: rotateY(180deg); }
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: #12092b; }
 ::-webkit-scrollbar-thumb { background: #4c1d95; border-radius: 9999px; }
