@@ -2,7 +2,7 @@
 <html lang="es" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <title>OhMyGiftCard! | Argon Edition - Juegos, Keys y Gift Cards</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -11,275 +11,187 @@
     <!-- Hoja de estilos personalizada -->
     <link rel="stylesheet" href="styles.css">
 </head>
-<body class="bg-[#12092b] text-white font-sans antialiased min-h-screen flex flex-col selection:bg-purple-600 selection:text-white">
+<body class="bg-[#12092b] text-white font-sans antialiased min-h-screen flex flex-col selection:bg-purple-600 selection:text-white overflow-x-hidden">
 
-    <!-- CONTENEDOR DE NOTIFICACIONES TOAST GAMER -->
-    <div id="toastNotificationContainer" class="fixed top-5 right-5 z-[60] flex flex-col gap-2.5 pointer-events-none"></div>
-
-    <!-- BARRA SUPERIOR CON SELECTOR DE MONEDA Y CUENTA -->
-    <div class="bg-[#0d0620] border-b border-purple-900/40 text-xs py-2 px-4">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div class="flex items-center space-x-4 text-purple-200">
-                <div class="flex items-center gap-2">
+    <!-- BARRA SUPERIOR RESPONSIVE -->
+    <div class="bg-[#0d0620] border-b border-purple-900/40 text-[11px] sm:text-xs py-2 px-3 sm:px-4">
+        <div class="max-w-7xl mx-auto flex justify-between items-center gap-2">
+            <div class="flex items-center space-x-2 sm:space-x-4 text-purple-200">
+                <span class="flex items-center gap-1.5 font-medium">
                     <i class="fa-solid fa-earth-americas text-fuchsia-400"></i>
-                    <span class="hidden sm:inline font-medium">Español (LATAM)</span>
-                    <span class="text-purple-700">|</span>
-                    <!-- Selector Multimoneda en Tiempo Real -->
-                    <select id="currencySelector" onchange="changeCurrency(this.value)" class="bg-[#1c0e42] border border-purple-700/70 text-white font-bold rounded-lg px-2 py-0.5 text-[11px] focus:outline-none focus:border-fuchsia-400 cursor-pointer">
-                        <option value="ARS">🇦🇷 ARS ($)</option>
-                        <option value="USD">🇺🇸 USD ($)</option>
-                        <option value="EUR">🇪🇺 EUR (€)</option>
-                    </select>
-                </div>
+                    <span class="hidden xs:inline">Español Latinoamericano |</span>
+                    <strong class="text-white">ARS ($)</strong>
+                </span>
                 <span class="hidden md:inline text-purple-700">|</span>
                 <span class="hidden md:inline text-purple-300">
                     <i class="fa-solid fa-bolt text-emerald-400 mr-1"></i> Entrega Digital Instantánea Argon Shield
                 </span>
             </div>
-
-            <div class="flex items-center space-x-2.5">
-                <button onclick="openPacksModal()" class="hidden sm:flex items-center gap-1.5 text-fuchsia-300 hover:text-white font-bold bg-fuchsia-950/60 border border-fuchsia-500/40 px-2.5 py-1 rounded-lg transition">
-                    <i class="fa-solid fa-dice text-amber-400"></i> Mystery Packs
-                </button>
-                <button onclick="openVaultModal()" class="text-purple-200 hover:text-white font-bold flex items-center gap-1.5 bg-[#1f1147] border border-purple-700/60 px-2.5 py-1 rounded-lg transition">
-                    <i class="fa-solid fa-key text-emerald-400"></i> Mis Keys (<span id="vaultCountBadge">0</span>)
-                </button>
+            <div class="flex items-center space-x-2 sm:space-x-4">
+                <span class="hidden lg:inline text-purple-300">
+                    <i class="fa-solid fa-shield-halved text-emerald-400 mr-1"></i> Protección al Comprador
+                </span>
                 <!-- Contenedor dinámico de sesión de usuario -->
                 <div id="userNavArea" class="flex items-center">
-                    <button onclick="openAuthModal('login')" class="text-white hover:text-fuchsia-300 font-bold transition flex items-center gap-1.5 bg-[#261556] hover:bg-[#321c70] border border-purple-700/70 px-3 py-1 rounded-lg shadow">
+                    <button onclick="openAuthModal('login')" class="text-white hover:text-fuchsia-300 font-bold transition flex items-center gap-1.5 bg-[#261556] hover:bg-[#321c70] border border-purple-700/70 px-2.5 sm:px-3 py-1 rounded-lg shadow text-[11px] sm:text-xs">
                         <i class="fa-regular fa-user text-fuchsia-400"></i>
-                        <span>Iniciar sesión | Crear cuenta</span>
+                        <span>Iniciar sesión <span class="hidden sm:inline">| Crear cuenta</span></span>
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- CABECERA PRINCIPAL (TIENDA) -->
+    <!-- CABECERA PRINCIPAL (2 FILAS EN MÓVIL, 1 FILA EN ESCRITORIO) -->
     <header id="mainHeader" class="sticky top-0 z-40 bg-[#190d3a]/95 backdrop-blur-md border-b border-purple-800/50 shadow-lg">
-        <div class="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between gap-4">
+        <div class="max-w-7xl mx-auto px-3 sm:px-4 py-2.5 md:py-0 md:h-20 flex flex-wrap md:flex-nowrap items-center justify-between gap-2.5 md:gap-4">
+            
             <!-- LOGO -->
-            <a href="#" onclick="switchView('store')" class="flex items-center space-x-3 group shrink-0">
-                <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-purple-600 via-fuchsia-500 to-amber-400 flex items-center justify-center shadow-lg shadow-purple-900/50 group-hover:scale-105 transition">
-                    <i class="fa-solid fa-fire-flame-curved text-xl text-white"></i>
+            <a href="#" onclick="switchView('store')" class="flex items-center space-x-2.5 sm:space-x-3 group shrink-0 order-1">
+                <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-tr from-purple-600 via-fuchsia-500 to-amber-400 flex items-center justify-center shadow-lg shadow-purple-900/50 group-hover:scale-105 transition">
+                    <i class="fa-solid fa-fire-flame-curved text-lg sm:text-xl text-white"></i>
                 </div>
                 <div>
-                    <span class="text-2xl font-black tracking-tight text-white">ohmy<span class="text-fuchsia-400">giftcard!</span></span>
-                    <span class="block text-[10px] tracking-widest text-purple-300 font-bold uppercase">Argon Gaming Market</span>
+                    <span class="text-xl sm:text-2xl font-black tracking-tight text-white block leading-none">ohmy<span class="text-fuchsia-400">giftcard!</span></span>
+                    <span class="block text-[9px] sm:text-[10px] tracking-widest text-purple-300 font-bold uppercase mt-0.5">Argon Gaming Market</span>
                 </div>
             </a>
 
-            <!-- BUSCADOR CON AUTOCOMPLETADO FLOTANTE -->
-            <div class="flex-1 max-w-xl relative">
-                <div class="relative">
-                    <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-purple-400">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                    </span>
-                    <input type="text" id="searchInput" oninput="handleSearchInput()" onfocus="handleSearchInput()" autocomplete="off" placeholder="Busca juegos, tarjetas o DLCs (Minecraft, Elden Ring, GTA V, Steam)..." class="w-full pl-11 pr-9 py-2.5 bg-[#261556] border border-purple-700/60 rounded-xl text-sm text-white placeholder-purple-300/60 focus:outline-none focus:border-fuchsia-400 focus:ring-2 focus:ring-fuchsia-400/20 transition">
-                    <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute inset-y-0 right-0 pr-3.5 text-purple-300 hover:text-white">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
-                </div>
-                <!-- Dropdown Autocompletado -->
-                <div id="searchAutocomplete" class="hidden absolute left-0 right-0 top-full mt-2 bg-[#1d0f42] border border-purple-600/80 rounded-2xl shadow-2xl overflow-hidden z-50 max-h-96 overflow-y-auto divide-y divide-purple-800/60"></div>
-            </div>
-
-            <!-- ACCIONES DERECHA -->
-            <div class="flex items-center space-x-2.5 shrink-0">
-                <!-- Favoritos -->
-                <button onclick="openWishlistModal()" title="Lista de Deseos" class="relative bg-[#261556] hover:bg-[#321c70] border border-purple-700/60 w-10 h-10 rounded-xl flex items-center justify-center text-pink-400 transition">
-                    <i class="fa-solid fa-heart"></i>
-                    <span id="wishlistBadge" class="absolute -top-1.5 -right-1.5 bg-pink-500 text-white text-[10px] font-black px-1.5 rounded-full">0</span>
-                </button>
-
-                <!-- Cartera Argon (Empieza en $0.00 y abre modal de canje al hacer clic) -->
-                <button onclick="openWalletModal()" class="hidden sm:flex items-center space-x-2.5 bg-[#261556] hover:bg-[#311b6e] border border-purple-700/60 px-3.5 py-2 rounded-xl transition text-left">
-                    <i class="fa-solid fa-wallet text-emerald-400 text-base"></i>
+            <!-- ACCIONES DERECHA (CARTERA EN $0,00 + CARRITO) -->
+            <div class="flex items-center space-x-2 sm:space-x-3 shrink-0 order-2 md:order-3">
+                <div class="flex items-center space-x-2 bg-[#261556] border border-purple-700/60 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl">
+                    <i class="fa-solid fa-wallet text-emerald-400 text-sm sm:text-base"></i>
                     <div>
-                        <span class="block text-[10px] text-purple-300 leading-none">Cartera Argon</span>
-                        <span id="walletBalance" class="text-xs font-extrabold text-emerald-400">$0,00 ARS</span>
+                        <span class="hidden sm:block text-[10px] text-purple-300 leading-none">Cartera Argon</span>
+                        <span id="walletBalance" class="text-[11px] sm:text-xs font-extrabold text-emerald-400 block leading-tight">$0,00 ARS</span>
                     </div>
-                </button>
+                </div>
 
-                <!-- Carro -->
-                <button onclick="toggleCart()" class="relative bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg shadow-purple-900/40 transition">
+                <button onclick="toggleCart()" class="relative bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 shadow-lg shadow-purple-900/40 transition">
                     <i class="fa-solid fa-cart-shopping"></i>
-                    <span class="hidden md:inline">Carro</span>
-                    <span id="cartBadge" class="bg-emerald-500 text-slate-950 text-[11px] font-black px-1.5 py-0.5 rounded-full">0</span>
+                    <span class="hidden sm:inline">Carro</span>
+                    <span id="cartBadge" class="bg-emerald-500 text-slate-950 text-[10px] sm:text-[11px] font-black px-1.5 py-0.5 rounded-full">0</span>
                 </button>
             </div>
+
+            <!-- BUSCADOR (ANCHO COMPLETO EN CELULAR, CENTRAL EN ESCRITORIO) -->
+            <div class="w-full md:flex-1 md:max-w-xl order-3 md:order-2">
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3.5 sm:pl-4 flex items-center pointer-events-none text-purple-400">
+                        <i class="fa-solid fa-magnifying-glass text-xs sm:text-sm"></i>
+                    </span>
+                    <input type="text" id="searchInput" oninput="filterProducts()" placeholder="Busca juegos o tarjetas (Minecraft, Elden Ring, GTA V, Steam, PSN)..." class="w-full pl-9 sm:pl-11 pr-4 py-2 sm:py-2.5 bg-[#261556] border border-purple-700/60 rounded-xl text-xs sm:text-sm text-white placeholder-purple-300/60 focus:outline-none focus:border-fuchsia-400 focus:ring-2 focus:ring-fuchsia-400/20 transition">
+                </div>
+            </div>
+
         </div>
     </header>
 
-    <!-- CABECERA DE CHECKOUT ESTILO ENEBA-ARGON -->
-    <header id="checkoutHeader" class="hidden bg-[#240e5e] border-b border-purple-800/60 py-5 px-6 shadow-md">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-            <a href="#" onclick="switchView('store')" class="flex items-center space-x-2.5">
-                <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-fuchsia-500 via-amber-400 to-emerald-400 flex items-center justify-center shadow">
-                    <i class="fa-solid fa-gamepad text-white text-sm"></i>
-                </div>
-                <span class="text-2xl font-black tracking-tight text-white">argon<span class="text-fuchsia-400">!</span></span>
-            </a>
+    <!-- CABECERA DE CHECKOUT ESTILO ENEBA-ARGON RESPONSIVE -->
+    <header id="checkoutHeader" class="hidden bg-[#240e5e] border-b border-purple-800/60 py-3.5 sm:py-5 px-3 sm:px-6 shadow-md">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3 sm:gap-4">
+            <div class="w-full md:w-auto flex items-center justify-between">
+                <a href="#" onclick="switchView('store')" class="flex items-center space-x-2">
+                    <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-tr from-fuchsia-500 via-amber-400 to-emerald-400 flex items-center justify-center shadow">
+                        <i class="fa-solid fa-gamepad text-white text-xs sm:text-sm"></i>
+                    </div>
+                    <span class="text-xl sm:text-2xl font-black tracking-tight text-white">argon<span class="text-fuchsia-400">!</span></span>
+                </a>
+                <span class="md:hidden text-[11px] text-purple-200 font-bold bg-purple-900/50 px-2.5 py-1 rounded-lg">ARS ($)</span>
+            </div>
 
-            <div class="flex items-center w-full max-w-xl">
-                <button onclick="switchView('store')" class="flex items-center space-x-2 text-emerald-400 font-semibold text-sm">
-                    <span class="w-7 h-7 rounded-full border-2 border-emerald-400 flex items-center justify-center text-xs">
+            <!-- Barra de Progreso Eneba Adaptable -->
+            <div class="flex items-center w-full max-w-xl text-xs sm:text-sm">
+                <button onclick="switchView('store')" class="flex items-center space-x-1.5 sm:space-x-2 text-emerald-400 font-semibold shrink-0">
+                    <span class="w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 border-emerald-400 flex items-center justify-center text-[10px] sm:text-xs">
                         <i class="fa-solid fa-check"></i>
                     </span>
                     <span>Carro</span>
                 </button>
-                <div class="flex-1 h-[2px] bg-emerald-400 mx-3"></div>
-                <div class="flex items-center space-x-2 text-emerald-400 font-bold text-sm">
-                    <span id="step2Circle" class="w-7 h-7 rounded-full bg-emerald-400 text-[#190d3a] flex items-center justify-center text-xs font-black">2</span>
+                <div class="flex-1 h-[2px] bg-emerald-400 mx-2 sm:mx-3"></div>
+                <div class="flex items-center space-x-1.5 sm:space-x-2 text-emerald-400 font-bold shrink-0">
+                    <span class="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-emerald-400 text-[#190d3a] flex items-center justify-center text-[10px] sm:text-xs font-black">2</span>
                     <span>Pago</span>
                 </div>
-                <div id="step3Line" class="flex-1 h-[2px] bg-purple-700 mx-3"></div>
-                <div id="step3Indicator" class="flex items-center space-x-2 text-purple-400 font-medium text-sm">
-                    <span id="step3Circle" class="w-7 h-7 rounded-full bg-purple-800/80 text-purple-300 flex items-center justify-center text-xs font-bold">3</span>
+                <div class="flex-1 h-[2px] bg-purple-700 mx-2 sm:mx-3"></div>
+                <div class="flex items-center space-x-1.5 sm:space-x-2 text-purple-400 font-medium shrink-0">
+                    <span class="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-purple-800/80 text-purple-300 flex items-center justify-center text-[10px] sm:text-xs font-bold">3</span>
                     <span>Obtén tu producto</span>
                 </div>
             </div>
 
-            <div class="hidden lg:flex items-center space-x-2 text-xs text-purple-200 font-medium">
-                <span>Compra 100% Protegida</span>
+            <div class="hidden md:flex items-center space-x-2 text-xs text-purple-200 font-medium shrink-0">
+                <span>Español Latinoamericano</span>
                 <span>|</span>
-                <span id="checkoutCurrencyLabel">ARS ($)</span>
+                <span>ARS ($)</span>
             </div>
         </div>
     </header>
 
     <!-- CONTENIDO PRINCIPAL -->
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-6">
+    <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-4 py-4 sm:py-6">
 
         <!-- VISTA 1: CATÁLOGO DE LA TIENDA -->
-        <section id="viewStore" class="space-y-7">
+        <section id="viewStore" class="space-y-4 sm:space-y-6">
             
-            <!-- NUEVO BANNER CINEMÁTICO INTERACTIVO HD (ESTILO EPIC GAMES / ENEBA PRO) -->
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
-                <!-- Escenario Principal Panorámico (8 columnas) -->
-                <div id="heroMainStage" class="lg:col-span-8 relative min-h-[320px] md:min-h-[380px] rounded-2xl overflow-hidden border border-purple-700/60 shadow-2xl flex items-end p-6 md:p-10 group bg-[#180b38]">
-                    <img id="heroSlideBg" src="https://cdn.cloudflare.steamstatic.com/steam/apps/2358720/library_hero.jpg" alt="Featured Game" class="absolute inset-0 w-full h-full object-cover object-center transition-all duration-700 scale-105 group-hover:scale-100">
-                    <!-- Degradado oscuro cinemático -->
+            <!-- NUEVO BANNER PANORÁMICO HD + ACCESOS RÁPIDOS RESPONSIVE -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4">
+                
+                <!-- Escenario Principal Destacado (8 cols en PC) -->
+                <div class="lg:col-span-8 relative min-h-[240px] sm:min-h-[300px] md:min-h-[340px] rounded-2xl overflow-hidden border border-purple-700/60 shadow-2xl flex items-end p-4 sm:p-7 md:p-9 group bg-[#180b38]">
+                    <img id="heroSlideBg" src="https://cdn.cloudflare.steamstatic.com/steam/apps/2358720/library_hero.jpg" alt="Destacado" class="absolute inset-0 w-full h-full object-cover object-center transition-all duration-700 group-hover:scale-105">
                     <div class="absolute inset-0 bg-gradient-to-t from-[#0d0521] via-[#12092b]/70 to-transparent"></div>
-                    <div class="absolute inset-0 bg-gradient-to-r from-[#0d0521]/95 via-[#0d0521]/40 to-transparent"></div>
+                    <div class="absolute inset-0 bg-gradient-to-r from-[#0d0521]/95 via-[#0d0521]/45 to-transparent"></div>
 
-                    <!-- Contenido del Slide Activo -->
-                    <div class="relative z-10 max-w-xl space-y-3">
-                        <div class="flex flex-wrap items-center gap-2">
-                            <span id="heroSlideBadge" class="bg-amber-400 text-slate-950 font-black text-[11px] px-2.5 py-0.5 rounded-md uppercase tracking-wider shadow">
-                                DESTACADO DE LA SEMANA
+                    <div class="relative z-10 max-w-xl space-y-2 sm:space-y-3 w-full">
+                        <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                            <span id="heroSlideBadge" class="bg-amber-400 text-slate-950 font-black text-[10px] sm:text-[11px] px-2.5 py-0.5 rounded-md uppercase tracking-wider shadow">
+                                OFERTA DESTACADA
                             </span>
-                            <span id="heroSlidePlatform" class="bg-purple-900/80 backdrop-blur-md border border-purple-500/40 text-purple-100 text-[11px] font-bold px-2.5 py-0.5 rounded-md">
+                            <span id="heroSlidePlatform" class="bg-purple-900/80 backdrop-blur-md border border-purple-500/40 text-purple-100 text-[10px] sm:text-[11px] font-bold px-2.5 py-0.5 rounded-md">
                                 Steam • GLOBAL
                             </span>
                         </div>
 
-                        <h1 id="heroSlideTitle" class="text-3xl md:text-5xl font-black text-white tracking-tight leading-none drop-shadow-lg">
+                        <h1 id="heroSlideTitle" class="text-2xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-none drop-shadow-lg">
                             Black Myth: Wukong
                         </h1>
 
-                        <p id="heroSlideDesc" class="text-xs md:text-sm text-purple-200/90 line-clamp-2">
-                            Adéntrate en un RPG de acción épico inspirado en la mitología clásica con entrega digital inmediata y Cashback garantizado en tu Cartera Argon.
+                        <p id="heroSlideDesc" class="text-xs sm:text-sm text-purple-200/90 line-clamp-2">
+                            Clave oficial verificada con entrega digital instantánea y acreditación automática de Cashback en tu Cartera Argon.
                         </p>
 
-                        <div class="flex flex-wrap items-center gap-4 pt-2">
+                        <div class="flex flex-wrap items-center justify-between sm:justify-start gap-3 sm:gap-5 pt-1">
                             <div>
-                                <span id="heroSlideOldPrice" class="block text-xs text-purple-300 line-through">$48.000,00 ARS</span>
-                                <div class="flex items-center gap-2">
-                                    <span id="heroSlidePrice" class="text-2xl md:text-3xl font-black text-emerald-400">$36.999,00 ARS</span>
-                                    <span id="heroSlideDiscount" class="bg-rose-600 text-white text-xs font-black px-2 py-0.5 rounded">-23%</span>
-                                </div>
+                                <span id="heroSlideOldPrice" class="block text-[11px] sm:text-xs text-purple-300 line-through">$48.000,00 ARS</span>
+                                <span id="heroSlidePrice" class="text-xl sm:text-2xl md:text-3xl font-black text-emerald-400">$36.999,00 ARS</span>
                             </div>
 
-                            <div class="flex items-center gap-2.5">
-                                <button id="heroBuyBtn" onclick="addToCart(11)" class="bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 font-black px-6 py-3 rounded-xl text-xs md:text-sm shadow-xl transition hover:scale-105 flex items-center gap-2">
-                                    <i class="fa-solid fa-cart-plus"></i> Comprar Clave
-                                </button>
-                                <button id="heroDetailBtn" onclick="openProductDetail(11)" class="bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white font-bold px-4 py-3 rounded-xl text-xs md:text-sm transition">
-                                    Ver Ficha
-                                </button>
-                            </div>
+                            <button id="heroBuyBtn" onclick="addToCart(11)" class="bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 font-black px-5 sm:px-7 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm shadow-xl transition hover:scale-105 flex items-center gap-2">
+                                <i class="fa-solid fa-cart-plus"></i> Añadir al Carro
+                            </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Columna Derecha: Selector de 4 Destacados (4 columnas) -->
-                <div id="heroSideThumbs" class="lg:col-span-4 flex flex-col justify-between gap-2.5">
-                    <!-- Inyectado dinámicamente desde app.js -->
-                </div>
-            </div>
-
-            <!-- BARRA RÁPIDA DE PLATAFORMAS CON LOGOS -->
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5">
-                <button onclick="quickFilterPlatform('Steam')" class="bg-[#1c0e42] hover:bg-[#28155c] border border-purple-800/70 hover:border-sky-400 p-3 rounded-xl flex items-center justify-center gap-2.5 transition group">
-                    <i class="fa-brands fa-steam text-xl text-sky-400 group-hover:scale-110 transition"></i>
-                    <span class="text-xs font-bold text-white">Steam</span>
-                </button>
-                <button onclick="quickFilterPlatform('PlayStation')" class="bg-[#1c0e42] hover:bg-[#28155c] border border-purple-800/70 hover:border-blue-400 p-3 rounded-xl flex items-center justify-center gap-2.5 transition group">
-                    <i class="fa-brands fa-playstation text-xl text-blue-400 group-hover:scale-110 transition"></i>
-                    <span class="text-xs font-bold text-white">PlayStation</span>
-                </button>
-                <button onclick="quickFilterPlatform('Xbox')" class="bg-[#1c0e42] hover:bg-[#28155c] border border-purple-800/70 hover:border-emerald-400 p-3 rounded-xl flex items-center justify-center gap-2.5 transition group">
-                    <i class="fa-brands fa-xbox text-xl text-emerald-400 group-hover:scale-110 transition"></i>
-                    <span class="text-xs font-bold text-white">Xbox Live</span>
-                </button>
-                <button onclick="quickFilterPlatform('Nintendo')" class="bg-[#1c0e42] hover:bg-[#28155c] border border-purple-800/70 hover:border-rose-400 p-3 rounded-xl flex items-center justify-center gap-2.5 transition group">
-                    <i class="fa-solid fa-gamepad text-xl text-rose-400 group-hover:scale-110 transition"></i>
-                    <span class="text-xs font-bold text-white">Nintendo</span>
-                </button>
-                <button onclick="quickFilterPlatform('Roblox')" class="bg-[#1c0e42] hover:bg-[#28155c] border border-purple-800/70 hover:border-amber-400 p-3 rounded-xl flex items-center justify-center gap-2.5 transition group">
-                    <i class="fa-solid fa-cubes text-xl text-amber-400 group-hover:scale-110 transition"></i>
-                    <span class="text-xs font-bold text-white">Roblox & V-Bucks</span>
-                </button>
-                <button onclick="openPacksModal()" class="bg-gradient-to-r from-purple-900/80 to-fuchsia-900/80 hover:from-purple-800 hover:to-fuchsia-800 border border-fuchsia-500/50 p-3 rounded-xl flex items-center justify-center gap-2.5 transition group">
-                    <i class="fa-solid fa-box-open text-xl text-amber-300 group-hover:scale-110 transition"></i>
-                    <span class="text-xs font-black text-white">Cofres Misteriosos</span>
-                </button>
-            </div>
-
-            <!-- SECCIÓN OFERTAS FLASH CON TEMPORIZADOR EN VIVO -->
-            <div class="bg-gradient-to-r from-[#1f0d4a] via-[#2b1263] to-[#1a0b3d] border border-rose-500/40 rounded-2xl p-5 shadow-xl space-y-4">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-purple-800/60 pb-3">
-                    <div class="flex items-center gap-3">
-                        <span class="bg-rose-600 text-white font-black text-xs px-3 py-1 rounded-lg uppercase tracking-wider flex items-center gap-1.5 shadow">
-                            <i class="fa-solid fa-fire-flame-simple"></i> Ofertas Flash
-                        </span>
-                        <h2 class="text-lg font-black text-white">Descuentos Relámpago con Stock Limitado</h2>
-                    </div>
-                    <div class="flex items-center gap-2 text-xs font-bold text-purple-200">
-                        <span>Termina en:</span>
-                        <div class="flex items-center gap-1 font-mono text-sm font-black">
-                            <span id="flashHours" class="bg-[#12072b] border border-purple-700 text-amber-400 px-2 py-1 rounded">04</span>:
-                            <span id="flashMinutes" class="bg-[#12072b] border border-purple-700 text-amber-400 px-2 py-1 rounded">42</span>:
-                            <span id="flashSeconds" class="bg-[#12072b] border border-purple-700 text-rose-400 px-2 py-1 rounded">19</span>
-                        </div>
-                    </div>
-                </div>
-                <div id="flashDealsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Selector Lateral de 4 Juegos Destacados (Grilla 2x2 en celular, columna en PC) -->
+                <div id="heroSideThumbs" class="lg:col-span-4 grid grid-cols-2 sm:grid-cols-4 lg:flex lg:flex-col justify-between gap-2 sm:gap-2.5">
                     <!-- Inyectado desde app.js -->
                 </div>
             </div>
 
-            <!-- FILTROS, CATEGORÍAS Y DESLIZADOR DE PRESUPUESTO -->
-            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-[#1d0f42] p-4 rounded-2xl border border-purple-800/60">
-                <div class="flex flex-wrap gap-2">
-                    <button onclick="setCategory('all', this)" class="cat-btn active-cat px-4 py-2 rounded-xl text-xs font-bold transition">Todos</button>
-                    <button onclick="setCategory('game', this)" class="cat-btn px-4 py-2 rounded-xl text-xs font-bold transition">Juegos PC / Consola</button>
-                    <button onclick="setCategory('dlc', this)" class="cat-btn px-4 py-2 rounded-xl text-xs font-bold transition">DLCs & Expansiones</button>
-                    <button onclick="setCategory('giftcard', this)" class="cat-btn px-4 py-2 rounded-xl text-xs font-bold transition">Gift Cards</button>
-                    <button onclick="setCategory('currency', this)" class="cat-btn px-4 py-2 rounded-xl text-xs font-bold transition">Monedas Virtuales</button>
-                    <button onclick="setCategory('subscription', this)" class="cat-btn px-4 py-2 rounded-xl text-xs font-bold transition">Suscripciones</button>
+            <!-- BARRA DE FILTROS Y CATEGORÍAS CON SWIPE HORIZONTAL EN MÓVIL -->
+            <div class="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-3 bg-[#1d0f42] p-3 sm:p-4 rounded-2xl border border-purple-800/60">
+                <div class="flex overflow-x-auto no-scrollbar gap-2 pb-0.5 md:pb-0 md:flex-wrap">
+                    <button onclick="setCategory('all', this)" class="cat-btn active-cat shrink-0 px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold transition">Todos (48)</button>
+                    <button onclick="setCategory('game', this)" class="cat-btn shrink-0 px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold transition">Juegos PC / Consola</button>
+                    <button onclick="setCategory('dlc', this)" class="cat-btn shrink-0 px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold transition">DLCs & Expansiones</button>
+                    <button onclick="setCategory('giftcard', this)" class="cat-btn shrink-0 px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold transition">Gift Cards</button>
+                    <button onclick="setCategory('currency', this)" class="cat-btn shrink-0 px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold transition">Monedas Virtuales</button>
+                    <button onclick="setCategory('subscription', this)" class="cat-btn shrink-0 px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold transition">Suscripciones</button>
                 </div>
-
-                <div class="flex flex-wrap items-center gap-4 w-full lg:w-auto justify-between lg:justify-end">
-                    <!-- Filtro de Precio Máximo -->
-                    <div class="flex items-center gap-2.5 bg-[#2a175e] border border-purple-700/60 px-3.5 py-2 rounded-xl">
-                        <span class="text-[11px] text-purple-200 font-semibold">Precio Máx:</span>
-                        <input type="range" id="maxPriceSlider" min="5000" max="75000" step="1000" value="75000" oninput="filterProducts()" class="accent-fuchsia-500 w-24 cursor-pointer">
-                        <span id="maxPriceLabel" class="text-xs font-black text-emerald-400">Sin límite</span>
-                    </div>
-
-                    <select id="sortSelect" onchange="filterProducts()" class="bg-[#2a175e] border border-purple-700/60 text-xs text-white font-semibold rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-fuchsia-400">
+                <div class="w-full md:w-auto shrink-0">
+                    <select id="sortSelect" onchange="filterProducts()" class="w-full md:w-auto bg-[#2a175e] border border-purple-700/60 text-xs text-white font-semibold rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-fuchsia-400">
                         <option value="featured">Ordenar: Destacados</option>
                         <option value="price-asc">Precio: Menor a Mayor</option>
                         <option value="price-desc">Precio: Mayor a Menor</option>
@@ -288,104 +200,112 @@
                 </div>
             </div>
 
-            <!-- GRILLA DE PRODUCTOS -->
-            <div id="productGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            <!-- GRILLA DE PRODUCTOS RESPONSIVE -->
+            <div id="productGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5 sm:gap-4">
                 <!-- Tarjetas inyectadas desde app.js -->
             </div>
         </section>
 
-        <!-- VISTA 2: SELECCIÓN DE MÉTODO DE PAGO (ESTILO ENEBA-ARGON) -->
-        <section id="viewCheckoutEneba" class="hidden max-w-6xl mx-auto py-4">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <!-- VISTA 2: SELECCIÓN DE MÉTODO DE PAGO (ESTILO ENEBA-ARGON RESPONSIVE) -->
+        <section id="viewCheckoutEneba" class="hidden max-w-6xl mx-auto py-2 sm:py-4">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
                 
-                <div class="lg:col-span-7 space-y-3.5">
+                <!-- COLUMNA IZQUIERDA: MÉTODOS DE PAGO -->
+                <div class="lg:col-span-7 space-y-3">
+                    
+                    <!-- Opción 1: Cartera Argon -->
                     <label class="eneba-pay-card selected-pay-card" onclick="selectPaymentCard(this, 'wallet')">
-                        <div class="flex items-center space-x-5">
-                            <div class="w-28 h-14 bg-white rounded-md flex items-center justify-center px-2 shadow-sm shrink-0">
-                                <div class="flex items-center space-x-1.5">
-                                    <div class="w-6 h-6 rounded-full bg-gradient-to-tr from-fuchsia-600 via-amber-400 to-emerald-400 flex items-center justify-center">
-                                        <i class="fa-solid fa-wallet text-white text-[10px]"></i>
+                        <div class="flex items-center space-x-3 sm:space-x-5 pr-2">
+                            <div class="w-16 h-11 sm:w-28 sm:h-14 bg-white rounded-md flex items-center justify-center px-1.5 sm:px-2 shadow-sm shrink-0">
+                                <div class="flex items-center space-x-1">
+                                    <div class="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-tr from-fuchsia-600 via-amber-400 to-emerald-400 flex items-center justify-center shrink-0">
+                                        <i class="fa-solid fa-wallet text-white text-[9px] sm:text-[10px]"></i>
                                     </div>
                                     <div class="leading-none text-left">
-                                        <span class="block text-sm font-black text-[#240e5e] tracking-tight">argon</span>
-                                        <span class="block text-[9px] font-bold text-purple-600 uppercase">wallet</span>
+                                        <span class="block text-xs sm:text-sm font-black text-[#240e5e] tracking-tight">argon</span>
+                                        <span class="block text-[8px] sm:text-[9px] font-bold text-purple-600 uppercase">wallet</span>
                                     </div>
                                 </div>
                             </div>
-                            <div>
-                                <span class="font-bold text-base text-white block">Cartera Argon (<span id="checkoutWalletAvailable">$0,00 ARS</span>)</span>
-                                <span class="text-xs text-purple-200/80">Paga con el dinero de tu cartera Argon o combínalo con tarjeta</span>
+                            <div class="min-w-0">
+                                <span class="font-bold text-sm sm:text-base text-white block">Cartera Argon</span>
+                                <span class="text-[11px] sm:text-xs text-purple-200/80 block">Paga con el dinero de tu cartera Argon</span>
                             </div>
                         </div>
                         <input type="radio" name="paymentMethod" value="wallet" checked class="eneba-radio">
                     </label>
 
+                    <!-- Opción 2: Mercadopago -->
                     <label class="eneba-pay-card" onclick="selectPaymentCard(this, 'mercadopago')">
-                        <div class="flex items-center space-x-5">
-                            <div class="w-28 h-14 bg-white rounded-md flex items-center justify-center px-2 shadow-sm shrink-0">
+                        <div class="flex items-center space-x-3 sm:space-x-5 pr-2">
+                            <div class="w-16 h-11 sm:w-28 sm:h-14 bg-white rounded-md flex items-center justify-center px-1.5 sm:px-2 shadow-sm shrink-0">
                                 <div class="flex flex-col items-center leading-none">
-                                    <i class="fa-solid fa-handshake text-[#009ee3] text-lg mb-0.5"></i>
-                                    <span class="text-[11px] font-black text-[#009ee3] tracking-tight">mercado<span class="text-[#2d3277]">pago</span></span>
+                                    <i class="fa-solid fa-handshake text-[#009ee3] text-sm sm:text-lg mb-0.5"></i>
+                                    <span class="text-[9px] sm:text-[11px] font-black text-[#009ee3] tracking-tight">mercado<span class="text-[#2d3277]">pago</span></span>
                                 </div>
                             </div>
                             <div>
-                                <span class="font-bold text-base text-white block">Mercadopago</span>
+                                <span class="font-bold text-sm sm:text-base text-white block">Mercadopago</span>
                             </div>
                         </div>
                         <input type="radio" name="paymentMethod" value="mercadopago" class="eneba-radio">
                     </label>
 
+                    <!-- Opción 3: Tarjeta de crédito o débito -->
                     <label class="eneba-pay-card" onclick="selectPaymentCard(this, 'card')">
-                        <div class="flex items-center space-x-5">
-                            <div class="w-28 h-14 bg-white rounded-md flex items-center justify-center space-x-2 px-2 shadow-sm shrink-0">
-                                <span class="font-black italic text-blue-800 text-lg tracking-tighter">VISA</span>
+                        <div class="flex items-center space-x-3 sm:space-x-5 pr-2">
+                            <div class="w-16 h-11 sm:w-28 sm:h-14 bg-white rounded-md flex items-center justify-center space-x-1 sm:space-x-2 px-1.5 sm:px-2 shadow-sm shrink-0">
+                                <span class="font-black italic text-blue-800 text-sm sm:text-lg tracking-tighter">VISA</span>
                                 <div class="flex -space-x-1.5">
-                                    <span class="w-5 h-5 rounded-full bg-red-600 inline-block opacity-90"></span>
-                                    <span class="w-5 h-5 rounded-full bg-amber-500 inline-block opacity-90"></span>
+                                    <span class="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-red-600 inline-block opacity-90"></span>
+                                    <span class="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-amber-500 inline-block opacity-90"></span>
                                 </div>
                             </div>
-                            <div>
-                                <span class="font-bold text-base text-white block">Tarjeta de crédito o débito</span>
-                                <span class="text-xs text-purple-200/80">Pague con tarjeta de débito o crédito Visa, Mastercard o Maestro</span>
+                            <div class="min-w-0">
+                                <span class="font-bold text-sm sm:text-base text-white block">Tarjeta de crédito o débito</span>
+                                <span class="text-[11px] sm:text-xs text-purple-200/80 block">Pague con tarjeta Visa, Mastercard o Maestro</span>
                             </div>
                         </div>
                         <input type="radio" name="paymentMethod" value="card" class="eneba-radio">
                     </label>
 
+                    <!-- Opción 4: PayPal -->
                     <label class="eneba-pay-card" onclick="selectPaymentCard(this, 'paypal')">
-                        <div class="flex items-center space-x-5">
-                            <div class="w-28 h-14 bg-white rounded-md flex items-center justify-center px-2 shadow-sm shrink-0">
-                                <span class="font-black italic text-xl text-[#003087]">Pay<span class="text-[#0079c1]">Pal</span></span>
+                        <div class="flex items-center space-x-3 sm:space-x-5 pr-2">
+                            <div class="w-16 h-11 sm:w-28 sm:h-14 bg-white rounded-md flex items-center justify-center px-1.5 sm:px-2 shadow-sm shrink-0">
+                                <span class="font-black italic text-base sm:text-xl text-[#003087]">Pay<span class="text-[#0079c1]">Pal</span></span>
                             </div>
                             <div>
-                                <span class="font-bold text-base text-white block">PayPal</span>
+                                <span class="font-bold text-sm sm:text-base text-white block">PayPal</span>
                             </div>
                         </div>
                         <input type="radio" name="paymentMethod" value="paypal" class="eneba-radio">
                     </label>
 
+                    <!-- Opción 5: Rapipago -->
                     <label class="eneba-pay-card" onclick="selectPaymentCard(this, 'rapipago')">
-                        <div class="flex items-center space-x-5">
-                            <div class="w-28 h-14 bg-white rounded-md flex items-center justify-center px-2 shadow-sm shrink-0">
-                                <span class="font-black text-base text-red-600 tracking-tighter lowercase">rapipago</span>
+                        <div class="flex items-center space-x-3 sm:space-x-5 pr-2">
+                            <div class="w-16 h-11 sm:w-28 sm:h-14 bg-white rounded-md flex items-center justify-center px-1.5 sm:px-2 shadow-sm shrink-0">
+                                <span class="font-black text-xs sm:text-base text-red-600 tracking-tighter lowercase">rapipago</span>
                             </div>
                             <div>
-                                <span class="font-bold text-base text-white block">Rapipago</span>
+                                <span class="font-bold text-sm sm:text-base text-white block">Rapipago</span>
                             </div>
                         </div>
                         <input type="radio" name="paymentMethod" value="rapipago" class="eneba-radio">
                     </label>
 
-                    <button onclick="goToPagoNubeGateway()" class="w-full mt-4 bg-[#f5a623] hover:bg-[#ffba42] text-slate-950 font-black py-4 rounded-xl shadow-lg transition text-base flex items-center justify-center gap-2">
+                    <button onclick="goToPagoNubeGateway()" class="w-full mt-4 bg-[#f5a623] hover:bg-[#ffba42] text-slate-950 font-black py-3.5 sm:py-4 rounded-xl shadow-lg transition text-sm sm:text-base flex items-center justify-center gap-2">
                         <span>Continuar</span>
                         <i class="fa-solid fa-arrow-right"></i>
                     </button>
                 </div>
 
-                <div class="lg:col-span-5 bg-[#35167d] border border-purple-700/50 rounded-lg p-6 space-y-5 shadow-xl">
-                    <div id="checkoutSummaryItems" class="space-y-6 divide-y divide-purple-700/60"></div>
+                <!-- COLUMNA DERECHA: RESUMEN AGRUPADO POR VENDEDOR -->
+                <div class="lg:col-span-5 bg-[#35167d] border border-purple-700/50 rounded-xl p-4 sm:p-6 space-y-5 shadow-xl">
+                    <div id="checkoutSummaryItems" class="space-y-5 divide-y divide-purple-700/60"></div>
 
-                    <div class="border-t border-purple-600/60 pt-4 space-y-2 text-sm">
+                    <div class="border-t border-purple-600/60 pt-4 space-y-2 text-xs sm:text-sm">
                         <div class="flex justify-between text-purple-200">
                             <span>Subtotal</span>
                             <span id="summarySubtotal" class="font-bold text-white">$0,00 ARS</span>
@@ -394,7 +314,7 @@
                             <span>Descuento cupón</span>
                             <span id="summaryDiscount" class="font-bold text-emerald-400">$0,00 ARS</span>
                         </div>
-                        <div class="flex justify-between text-lg font-black pt-2 border-t border-purple-700/50">
+                        <div class="flex justify-between text-base sm:text-lg font-black pt-2 border-t border-purple-700/50">
                             <span>Total</span>
                             <span id="summaryTotal" class="text-white">$0,00 ARS</span>
                         </div>
@@ -404,98 +324,50 @@
             </div>
         </section>
 
-        <!-- VISTA 3: PASARELA DE PAGO CON TARJETA 3D INTERACTIVA -->
-        <section id="viewCheckoutPagoNube" class="hidden max-w-4xl mx-auto py-4 space-y-6">
-            <div class="flex items-center justify-between bg-[#261259] border border-purple-700/50 px-5 py-3.5 rounded-xl">
+        <!-- VISTA 3: PASARELA DE PAGO (ESTILO PAGONUBE / ARGON PAY RESPONSIVE) -->
+        <section id="viewCheckoutPagoNube" class="hidden max-w-4xl mx-auto py-2 sm:py-4 space-y-4 sm:space-y-6">
+            <div class="flex items-center justify-between bg-[#261259] border border-purple-700/50 px-4 py-3 rounded-xl">
                 <button onclick="backToEnebaSelection()" class="text-purple-200 hover:text-white text-xs font-bold flex items-center gap-2">
                     <i class="fa-solid fa-arrow-left"></i> Cambiar método de pago
                 </button>
-                <div class="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
-                    <i class="fa-solid fa-shield-halved"></i> Conexión Segura SSL 256-bit
+                <div class="text-[11px] sm:text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                    <i class="fa-solid fa-shield-halved"></i> SSL 256-bit
                 </div>
             </div>
 
-            <div class="bg-[#210f4d] border border-purple-700/60 p-6 md:p-8 rounded-2xl shadow-2xl space-y-6">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-purple-800/80 pb-4">
+            <div class="bg-[#210f4d] border border-purple-700/60 p-4 sm:p-6 md:p-8 rounded-2xl shadow-2xl">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-5 border-b border-purple-800/80 pb-4">
                     <div>
-                        <h2 class="text-2xl font-black text-white">Finalizar Compra — Argon Pay</h2>
-                        <p class="text-xs text-purple-300">Completa tus datos para desbloquear las claves digitales al instante.</p>
+                        <h2 class="text-xl sm:text-2xl font-black text-white">Finalizar Compra — Argon Pay</h2>
+                        <p class="text-xs text-purple-300">Completa los datos de facturación y pago para recibir tus códigos al instante.</p>
                     </div>
-                    <span id="selectedMethodBadge" class="text-xs bg-purple-800 text-emerald-300 px-3 py-1 rounded-lg font-bold uppercase">TARJETA</span>
+                    <span id="selectedMethodBadge" class="text-xs bg-purple-800 text-purple-200 px-2.5 py-1 rounded-md font-bold uppercase">TARJETA</span>
                 </div>
 
-                <!-- TARJETA 3D ANIMADA EN VIVO -->
-                <div class="card-3d-perspective max-w-sm mx-auto">
-                    <div id="interactiveCard3D" class="card-3d-inner">
-                        <!-- Frente de la tarjeta -->
-                        <div class="card-3d-front bg-gradient-to-br from-[#3b188f] via-[#6b21a8] to-[#1e1b4b] border border-fuchsia-400/40 rounded-2xl p-5 flex flex-col justify-between shadow-2xl">
-                            <div class="flex justify-between items-center">
-                                <div class="w-11 h-8 rounded bg-gradient-to-tr from-amber-300 to-yellow-500 border border-amber-200 flex items-center justify-center">
-                                    <div class="w-7 h-5 border border-amber-700/40 rounded-sm"></div>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <i class="fa-solid fa-wifi rotate-90 text-purple-200/70 text-sm"></i>
-                                    <span id="cardBrandLogo" class="font-black italic text-xl text-white tracking-wider">VISA</span>
-                                </div>
-                            </div>
-                            <div class="my-auto pt-3">
-                                <p id="cardPreviewNumber" class="font-mono text-lg md:text-xl tracking-widest font-bold text-white drop-shadow">
-                                    •••• •••• •••• ••••
-                                </p>
-                            </div>
-                            <div class="flex justify-between items-end text-xs">
-                                <div>
-                                    <span class="block text-[9px] text-purple-300 uppercase">Titular</span>
-                                    <span id="cardPreviewName" class="font-bold uppercase tracking-wider text-white">NOMBRE Y APELLIDO</span>
-                                </div>
-                                <div class="text-right">
-                                    <span class="block text-[9px] text-purple-300 uppercase">Vence</span>
-                                    <span id="cardPreviewExp" class="font-mono font-bold text-white">MM/AA</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Dorso de la tarjeta -->
-                        <div class="card-3d-back bg-gradient-to-br from-[#1e1b4b] via-[#3b188f] to-[#12092b] border border-fuchsia-400/40 rounded-2xl py-5 flex flex-col justify-between shadow-2xl">
-                            <div class="w-full h-10 bg-slate-950"></div>
-                            <div class="px-5 space-y-1">
-                                <span class="block text-[9px] text-purple-200 text-right uppercase">Código de Seguridad (CVV)</span>
-                                <div class="w-full h-9 bg-white rounded flex items-center justify-end px-3">
-                                    <span id="cardPreviewCvv" class="font-mono font-black text-slate-900 tracking-widest">•••</span>
-                                </div>
-                            </div>
-                            <div class="px-5 flex justify-between items-center text-[10px] text-purple-300">
-                                <span>Argon Shield 256-Bit</span>
-                                <i class="fa-solid fa-lock text-emerald-400"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <form id="sandboxForm" onsubmit="processSandboxPayment(event)" class="space-y-5">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <form id="sandboxForm" onsubmit="processSandboxPayment(event)" class="space-y-4 sm:space-y-5">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
                         <div>
-                            <label class="block text-xs font-bold text-purple-200 mb-1.5">Nombre y Apellido del Titular</label>
-                            <input type="text" id="sbName" required oninput="updateCardPreview()" placeholder="Ej: Martín Gómez" class="w-full bg-[#160a36] border border-purple-700/70 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-fuchsia-400">
+                            <label class="block text-xs font-bold text-purple-200 mb-1">Nombre y Apellido del Titular</label>
+                            <input type="text" id="sbName" required placeholder="Ej: Martín Gómez" class="w-full bg-[#160a36] border border-purple-700/70 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-fuchsia-400">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-purple-200 mb-1.5">Correo Electrónico (donde recibirás la Key)</label>
-                            <input type="email" id="sbEmail" required placeholder="martin@correo.com" class="w-full bg-[#160a36] border border-purple-700/70 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-fuchsia-400">
+                            <label class="block text-xs font-bold text-purple-200 mb-1">Correo Electrónico (donde recibirás la Key)</label>
+                            <input type="email" id="sbEmail" required placeholder="martin@correo.com" class="w-full bg-[#160a36] border border-purple-700/70 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-fuchsia-400">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-purple-200 mb-1.5">Teléfono / WhatsApp</label>
-                            <input type="text" id="sbPhone" required placeholder="+54 9 11 5544 3322" class="w-full bg-[#160a36] border border-purple-700/70 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-fuchsia-400">
+                            <label class="block text-xs font-bold text-purple-200 mb-1">Teléfono / WhatsApp</label>
+                            <input type="text" id="sbPhone" required placeholder="+54 9 11 5544 3322" class="w-full bg-[#160a36] border border-purple-700/70 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-fuchsia-400">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-purple-200 mb-1.5">DNI / CUIT</label>
-                            <input type="text" id="sbDni" required placeholder="38123456" class="w-full bg-[#160a36] border border-purple-700/70 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-fuchsia-400">
+                            <label class="block text-xs font-bold text-purple-200 mb-1">DNI / CUIT</label>
+                            <input type="text" id="sbDni" required placeholder="38123456" class="w-full bg-[#160a36] border border-purple-700/70 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-fuchsia-400">
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
                         <div>
-                            <label class="block text-xs font-bold text-purple-200 mb-1.5">Provincia</label>
-                            <select id="sbProvince" class="w-full bg-[#160a36] border border-purple-700/70 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-fuchsia-400">
+                            <label class="block text-xs font-bold text-purple-200 mb-1">Provincia</label>
+                            <select id="sbProvince" class="w-full bg-[#160a36] border border-purple-700/70 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-fuchsia-400">
                                 <option value="CABA">Ciudad Autónoma de Buenos Aires</option>
                                 <option value="Buenos Aires">Provincia de Buenos Aires</option>
                                 <option value="Misiones">Misiones</option>
@@ -505,27 +377,31 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-purple-200 mb-1.5">Dirección de Facturación</label>
-                            <input type="text" id="sbAddress" required placeholder="Av. Corrientes 1234" class="w-full bg-[#160a36] border border-purple-700/70 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-fuchsia-400">
+                            <label class="block text-xs font-bold text-purple-200 mb-1">Dirección de Facturación</label>
+                            <input type="text" id="sbAddress" required placeholder="Av. Corrientes 1234" class="w-full bg-[#160a36] border border-purple-700/70 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-fuchsia-400">
                         </div>
                     </div>
 
-                    <div class="p-5 bg-[#160a36] border border-purple-800/80 rounded-2xl space-y-4">
+                    <!-- DATOS DE TARJETA -->
+                    <div class="p-4 sm:p-5 bg-[#160a36] border border-purple-800/80 rounded-2xl space-y-4">
+                        <h4 class="font-bold text-xs sm:text-sm flex items-center gap-2 text-white">
+                            <i class="fa-solid fa-credit-card text-fuchsia-400"></i> Detalles del Medio de Pago
+                        </h4>
                         <div>
-                            <label class="block text-xs font-bold text-purple-200 mb-1.5">Número de Tarjeta (16 dígitos)</label>
-                            <input type="text" id="sbCardNum" required maxlength="19" oninput="formatCardNumberInput(this)" placeholder="4532 •••• •••• ••••" class="w-full bg-[#210f4d] border border-purple-700/70 rounded-xl px-4 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-fuchsia-400">
+                            <label class="block text-xs font-bold text-purple-200 mb-1">Número de Tarjeta</label>
+                            <input type="text" id="sbCardNum" required placeholder="4532 •••• •••• ••••" class="w-full bg-[#210f4d] border border-purple-700/70 rounded-xl px-3.5 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-fuchsia-400">
                         </div>
-                        <div class="grid grid-cols-3 gap-4">
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
                             <div>
-                                <label class="block text-xs font-bold text-purple-200 mb-1.5">Vencimiento</label>
-                                <input type="text" id="sbCardExp" required maxlength="5" oninput="formatCardExpInput(this)" placeholder="MM/AA" class="w-full bg-[#210f4d] border border-purple-700/70 rounded-xl px-4 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-fuchsia-400">
+                                <label class="block text-xs font-bold text-purple-200 mb-1">Vencimiento</label>
+                                <input type="text" id="sbCardExp" required placeholder="MM/AA" class="w-full bg-[#210f4d] border border-purple-700/70 rounded-xl px-3.5 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-fuchsia-400">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-purple-200 mb-1.5">Código CVV</label>
-                                <input type="password" id="sbCardCvv" required maxlength="4" onfocus="flipCard3D(true)" onblur="flipCard3D(false)" oninput="updateCardPreview()" placeholder="•••" class="w-full bg-[#210f4d] border border-purple-700/70 rounded-xl px-4 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-fuchsia-400">
+                                <label class="block text-xs font-bold text-purple-200 mb-1">Código CVV</label>
+                                <input type="password" id="sbCardCvv" required placeholder="•••" maxlength="4" class="w-full bg-[#210f4d] border border-purple-700/70 rounded-xl px-3.5 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-fuchsia-400">
                             </div>
-                            <div>
-                                <label class="block text-xs font-bold text-purple-200 mb-1.5">Cuotas</label>
+                            <div class="col-span-2 sm:col-span-1">
+                                <label class="block text-xs font-bold text-purple-200 mb-1">Cuotas</label>
                                 <select id="sbInstallments" class="w-full bg-[#210f4d] border border-purple-700/70 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-fuchsia-400">
                                     <option value="1">1 cuota (Sin interés)</option>
                                     <option value="3">3 cuotas fijas</option>
@@ -535,7 +411,7 @@
                         </div>
                     </div>
 
-                    <button type="submit" id="submitPayBtn" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black py-4 rounded-xl shadow-lg transition text-base flex items-center justify-center gap-2">
+                    <button type="submit" id="submitPayBtn" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black py-3.5 sm:py-4 rounded-xl shadow-lg transition text-sm sm:text-base flex items-center justify-center gap-2">
                         <i class="fa-solid fa-lock"></i>
                         <span>Pagar Ahora y Obtener Producto</span>
                     </button>
@@ -544,26 +420,23 @@
         </section>
 
         <!-- VISTA 4: PASO 3 — OBTÉN TU PRODUCTO -->
-        <section id="viewSuccess" class="hidden max-w-4xl mx-auto py-4 space-y-6">
-            <div class="bg-[#261259] border border-emerald-500/40 p-8 rounded-2xl text-center space-y-4 shadow-2xl">
-                <div class="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-3xl border border-emerald-500/40">
+        <section id="viewSuccess" class="hidden max-w-4xl mx-auto py-3 sm:py-4 space-y-5">
+            <div class="bg-[#261259] border border-emerald-500/40 p-5 sm:p-8 rounded-2xl text-center space-y-3.5 shadow-2xl">
+                <div class="w-14 h-14 sm:w-16 sm:h-16 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-2xl sm:text-3xl border border-emerald-500/40">
                     <i class="fa-solid fa-check"></i>
                 </div>
-                <h2 class="text-3xl font-black">¡Transacción Completada!</h2>
-                <p class="text-purple-200 text-sm max-w-md mx-auto">Tus claves digitales están listas y también quedaron guardadas en tu bóveda "Mis Keys".</p>
+                <h2 class="text-2xl sm:text-3xl font-black">¡Transacción Completada!</h2>
+                <p class="text-purple-200 text-xs sm:text-sm max-w-md mx-auto">Tus claves digitales están listas para activarse inmediatamente.</p>
                 <div id="cashbackNotice" class="inline-block bg-emerald-950/70 border border-emerald-500/40 px-4 py-2 rounded-xl text-xs text-emerald-300 font-bold"></div>
             </div>
 
-            <div class="space-y-4">
-                <h3 class="text-xl font-bold">Tus Claves Digitales (Paso 3)</h3>
-                <div id="keysContainer" class="space-y-4"></div>
+            <div class="space-y-3.5">
+                <h3 class="text-lg sm:text-xl font-bold">Tus Claves Digitales (Paso 3)</h3>
+                <div id="keysContainer" class="space-y-3.5"></div>
             </div>
 
-            <div class="flex justify-center gap-3 pt-4">
-                <button onclick="openVaultModal()" class="bg-[#2a175e] hover:bg-[#38207a] border border-purple-600 text-white font-bold px-6 py-3.5 rounded-xl text-sm transition">
-                    <i class="fa-solid fa-key text-emerald-400 mr-1.5"></i> Ver Bóveda Mis Keys
-                </button>
-                <button onclick="switchView('store')" class="bg-purple-600 hover:bg-purple-500 text-white font-bold px-8 py-3.5 rounded-xl text-sm transition">
+            <div class="flex justify-center pt-2">
+                <button onclick="switchView('store')" class="w-full sm:w-auto bg-purple-600 hover:bg-purple-500 text-white font-bold px-8 py-3.5 rounded-xl text-sm transition">
                     Volver al Catálogo Principal
                 </button>
             </div>
@@ -571,164 +444,31 @@
 
     </main>
 
-    <!-- MODAL CARTERA ARGON (EMPIEZA EN $0.00 + CANJE DE CÓDIGO DE SALDO) -->
-    <div id="walletModal" class="fixed inset-0 z-50 flex items-center justify-center hidden px-4">
-        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeWalletModal()"></div>
-        <div class="relative bg-[#1d0f42] border border-purple-700 p-6 md:p-8 rounded-2xl w-full max-w-md shadow-2xl space-y-5 z-10">
-            <div class="flex justify-between items-center border-b border-purple-800 pb-3">
-                <h3 class="font-black text-lg flex items-center gap-2 text-emerald-400">
-                    <i class="fa-solid fa-wallet"></i> Mi Cartera Argon
-                </h3>
-                <button onclick="closeWalletModal()" class="text-purple-300 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-
-            <div class="bg-gradient-to-br from-[#2a1463] to-[#140830] border border-emerald-500/30 rounded-2xl p-5 text-center space-y-1">
-                <span class="text-xs text-purple-300 uppercase font-bold tracking-wider">Saldo Disponible</span>
-                <div id="walletModalBalance" class="text-3xl font-black text-emerald-400">$0,00 ARS</div>
-                <p class="text-[11px] text-purple-300 pt-1">Acumulas hasta un 10% de Cashback automático en cada compra.</p>
-            </div>
-
-            <div class="space-y-2">
-                <label class="block text-xs font-bold text-purple-200">Canjear Código de Regalo Argon</label>
-                <div class="flex gap-2">
-                    <input type="text" id="giftCodeInput" placeholder="Código de regalo" class="flex-1 bg-[#2a175e] border border-purple-700 rounded-xl px-3.5 py-2.5 text-xs text-white uppercase focus:outline-none focus:border-emerald-400">
-                    <button onclick="redeemWalletCode()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-4 py-2.5 rounded-xl text-xs transition">
-                        Canjear
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL DE VISTA DETALLADA DE PRODUCTO -->
-    <div id="productDetailModal" class="fixed inset-0 z-50 flex items-center justify-center hidden px-4 py-6 overflow-y-auto">
-        <div class="fixed inset-0 bg-black/80 backdrop-blur-sm" onclick="closeProductDetail()"></div>
-        <div id="productDetailContent" class="relative bg-[#1b0e3f] border border-purple-700/80 rounded-2xl w-full max-w-4xl p-6 md:p-8 shadow-2xl z-10 my-auto"></div>
-    </div>
-
-    <!-- MODAL RULETA DE SOBRES (ARGON MYSTERY PACKS) -->
-    <div id="packsModal" class="fixed inset-0 z-50 flex items-center justify-center hidden px-4">
-        <div class="absolute inset-0 bg-black/85 backdrop-blur-sm" onclick="closePacksModal()"></div>
-        <div class="relative bg-[#1d0f42] border border-fuchsia-500/60 p-6 md:p-8 rounded-2xl w-full max-w-3xl shadow-2xl space-y-6 z-10">
-            <div class="flex justify-between items-center border-b border-purple-800 pb-3">
-                <div class="flex items-center gap-2.5">
-                    <i class="fa-solid fa-dragon text-2xl text-amber-400"></i>
-                    <div>
-                        <h3 class="font-black text-xl text-white">Argon Mystery Packs</h3>
-                        <p class="text-xs text-purple-300">Elige un cofre misterioso y gana una clave digital aleatoria garantizada al instante</p>
-                    </div>
-                </div>
-                <button onclick="closePacksModal()" class="text-purple-300 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div class="bg-gradient-to-b from-[#2a175e] to-[#160a36] border border-amber-700/60 rounded-2xl p-5 text-center space-y-3 flex flex-col justify-between">
-                    <div class="w-16 h-20 mx-auto rounded-xl bg-gradient-to-tr from-amber-800 to-amber-500 flex items-center justify-center shadow-lg">
-                        <i class="fa-solid fa-box-open text-2xl text-white"></i>
-                    </div>
-                    <div>
-                        <h4 class="font-black text-base text-amber-300">Pack Bronce</h4>
-                        <p class="text-[11px] text-purple-200 mt-1">Juegos Indie, DLCs o Tarjetas de $10 USD.</p>
-                    </div>
-                    <div>
-                        <span class="block text-lg font-black text-white mb-2" data-pack-price="8500">$8.500,00 ARS</span>
-                        <button onclick="spinMysteryPack('Bronce', 8500)" class="w-full bg-amber-600 hover:bg-amber-500 text-slate-950 font-black py-2.5 rounded-xl text-xs transition">
-                            Abrir Sobre
-                        </button>
-                    </div>
-                </div>
-
-                <div class="bg-gradient-to-b from-[#3b188f] to-[#160a36] border-2 border-amber-400 rounded-2xl p-5 text-center space-y-3 flex flex-col justify-between relative shadow-xl">
-                    <span class="absolute -top-2.5 inset-x-8 bg-amber-400 text-slate-950 font-black text-[10px] py-0.5 rounded-full uppercase">Más Popular</span>
-                    <div class="w-16 h-20 mx-auto rounded-xl bg-gradient-to-tr from-amber-500 to-yellow-300 flex items-center justify-center shadow-lg">
-                        <i class="fa-solid fa-crown text-2xl text-slate-950"></i>
-                    </div>
-                    <div>
-                        <h4 class="font-black text-base text-yellow-300">Pack Oro</h4>
-                        <p class="text-[11px] text-purple-200 mt-1">Juegos AAA (GTA V, RE4, Palworld, Hogwarts).</p>
-                    </div>
-                    <div>
-                        <span class="block text-lg font-black text-white mb-2" data-pack-price="18900">$18.900,00 ARS</span>
-                        <button onclick="spinMysteryPack('Oro', 18900)" class="w-full bg-amber-400 hover:bg-amber-300 text-slate-950 font-black py-2.5 rounded-xl text-xs transition">
-                            Abrir Sobre
-                        </button>
-                    </div>
-                </div>
-
-                <div class="bg-gradient-to-b from-[#4c1284] to-[#160a36] border border-cyan-400/70 rounded-2xl p-5 text-center space-y-3 flex flex-col justify-between">
-                    <div class="w-16 h-20 mx-auto rounded-xl bg-gradient-to-tr from-fuchsia-500 to-cyan-400 flex items-center justify-center shadow-lg">
-                        <i class="fa-solid fa-gem text-2xl text-white"></i>
-                    </div>
-                    <div>
-                        <h4 class="font-black text-base text-cyan-300">Pack Diamante VIP</h4>
-                        <p class="text-[11px] text-purple-200 mt-1">Lanzamientos Top (FC 25, Wukong, Elden Ring, PSN $50).</p>
-                    </div>
-                    <div>
-                        <span class="block text-lg font-black text-white mb-2" data-pack-price="32000">$32.000,00 ARS</span>
-                        <button onclick="spinMysteryPack('Diamante', 32000)" class="w-full bg-gradient-to-r from-fuchsia-500 to-cyan-400 hover:opacity-95 text-slate-950 font-black py-2.5 rounded-xl text-xs transition">
-                            Abrir Sobre
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div id="packSpinResult" class="hidden bg-[#140930] border border-emerald-500/50 rounded-2xl p-5 text-center space-y-3"></div>
-        </div>
-    </div>
-
-    <!-- MODAL BÓVEDA "MIS KEYS" -->
-    <div id="vaultModal" class="fixed inset-0 z-50 flex items-center justify-center hidden px-4">
-        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeVaultModal()"></div>
-        <div class="relative bg-[#1d0f42] border border-purple-700 p-6 rounded-2xl w-full max-w-2xl shadow-2xl space-y-4 z-10">
-            <div class="flex justify-between items-center border-b border-purple-800 pb-3">
-                <h3 class="font-black text-lg flex items-center gap-2 text-emerald-400">
-                    <i class="fa-solid fa-key"></i> Bóveda de Claves Adquiridas ("Mis Keys")
-                </h3>
-                <button onclick="closeVaultModal()" class="text-purple-300 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <div id="vaultKeysList" class="space-y-3 max-h-96 overflow-y-auto pr-1"></div>
-        </div>
-    </div>
-
-    <!-- MODAL LISTA DE DESEOS (FAVORITOS) -->
-    <div id="wishlistModal" class="fixed inset-0 z-50 flex items-center justify-center hidden px-4">
-        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeWishlistModal()"></div>
-        <div class="relative bg-[#1d0f42] border border-purple-700 p-6 rounded-2xl w-full max-w-2xl shadow-2xl space-y-4 z-10">
-            <div class="flex justify-between items-center border-b border-purple-800 pb-3">
-                <h3 class="font-black text-lg flex items-center gap-2 text-pink-400">
-                    <i class="fa-solid fa-heart"></i> Mi Lista de Deseos (Favoritos)
-                </h3>
-                <button onclick="closeWishlistModal()" class="text-purple-300 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <div id="wishlistItemsContainer" class="space-y-3 max-h-96 overflow-y-auto pr-1"></div>
-        </div>
-    </div>
-
-    <!-- DRAWER LATERAL DEL CARRITO -->
+    <!-- DRAWER LATERAL DEL CARRITO RESPONSIVE -->
     <div id="cartDrawer" class="fixed inset-0 z-50 overflow-hidden hidden">
         <div class="absolute inset-0 bg-black/75 backdrop-blur-sm" onclick="toggleCart()"></div>
-        <div class="absolute inset-y-0 right-0 max-w-full flex pl-10">
-            <div class="w-screen max-w-md bg-[#1d0f42] border-l border-purple-800/70 p-6 flex flex-col justify-between shadow-2xl">
+        <div class="absolute inset-y-0 right-0 max-w-full flex pl-0 sm:pl-10">
+            <div class="w-screen max-w-md bg-[#1d0f42] border-l border-purple-800/70 p-4 sm:p-6 flex flex-col justify-between shadow-2xl">
                 <div class="space-y-4">
-                    <div class="flex items-center justify-between border-b border-purple-800 pb-4">
-                        <h2 class="text-lg font-black flex items-center gap-2">
+                    <div class="flex items-center justify-between border-b border-purple-800 pb-3.5">
+                        <h2 class="text-base sm:text-lg font-black flex items-center gap-2">
                             <i class="fa-solid fa-cart-shopping text-fuchsia-400"></i> Mi Carro (<span id="cartCount">0</span>)
                         </h2>
                         <button onclick="toggleCart()" class="text-purple-300 hover:text-white text-xl">
                             <i class="fa-solid fa-xmark"></i>
                         </button>
                     </div>
-                    <div id="cartItemsList" class="space-y-3 max-h-[52vh] overflow-y-auto pr-1"></div>
+                    <div id="cartItemsList" class="space-y-3 max-h-[50dvh] overflow-y-auto pr-1"></div>
                 </div>
 
                 <div class="space-y-4 border-t border-purple-800 pt-4">
                     <div class="flex gap-2">
                         <input type="text" id="couponInput" placeholder="Cupón (ej: ARGON10)" class="flex-1 bg-[#2a175e] border border-purple-700 rounded-xl px-3 py-2 text-xs text-white uppercase placeholder-purple-300/60 focus:outline-none">
-                        <button onclick="applyCoupon()" class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-xl text-xs font-bold transition">Aplicar</button>
+                        <button onclick="applyCoupon()" class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-xl text-xs font-bold transition shrink-0">Aplicar</button>
                     </div>
                     <div id="couponMessage" class="text-xs"></div>
 
-                    <div class="space-y-1.5 text-sm">
+                    <div class="space-y-1.5 text-xs sm:text-sm">
                         <div class="flex justify-between text-purple-200">
                             <span>Subtotal</span>
                             <span id="cartSubtotal">$0,00 ARS</span>
@@ -737,7 +477,7 @@
                             <span>Descuento</span>
                             <span id="cartDiscount" class="text-emerald-400">$0,00 ARS</span>
                         </div>
-                        <div class="flex justify-between text-lg font-black pt-2 border-t border-purple-800">
+                        <div class="flex justify-between text-base sm:text-lg font-black pt-2 border-t border-purple-800">
                             <span>Total</span>
                             <span id="cartTotal" class="text-emerald-400">$0,00 ARS</span>
                         </div>
@@ -752,15 +492,15 @@
     </div>
 
     <!-- MODAL DE INICIAR SESIÓN / CREAR CUENTA -->
-    <div id="authModal" class="fixed inset-0 z-50 flex items-center justify-center hidden px-4">
+    <div id="authModal" class="fixed inset-0 z-50 flex items-center justify-center hidden px-3 sm:px-4">
         <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeAuthModal()"></div>
-        <div class="relative bg-[#1d0f42] border border-purple-700 p-6 md:p-8 rounded-2xl w-full max-w-md shadow-2xl space-y-5 z-10">
+        <div class="relative bg-[#1d0f42] border border-purple-700 p-5 sm:p-8 rounded-2xl w-full max-w-md shadow-2xl space-y-5 z-10 max-h-[90dvh] overflow-y-auto">
             <div class="flex justify-between items-center border-b border-purple-800 pb-3">
                 <div class="flex items-center space-x-2">
                     <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-purple-600 to-fuchsia-500 flex items-center justify-center">
                         <i class="fa-solid fa-user-astronaut text-white text-sm"></i>
                     </div>
-                    <h3 id="authModalTitle" class="font-black text-lg text-white">Iniciar Sesión en Argon</h3>
+                    <h3 id="authModalTitle" class="font-black text-base sm:text-lg text-white">Iniciar Sesión en Argon</h3>
                 </div>
                 <button onclick="closeAuthModal()" class="text-purple-300 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
@@ -795,13 +535,13 @@
         </div>
     </div>
 
-    <!-- MODAL DE ADMINISTRACIÓN (SOLO ACCESIBLE POR URL /#admin) -->
-    <div id="adminModal" class="fixed inset-0 z-50 flex items-center justify-center hidden px-4 py-6 overflow-y-auto">
-        <div class="fixed inset-0 bg-black/80 backdrop-blur-sm" onclick="closeAdminModal()"></div>
-        <div class="relative bg-[#1d0f42] border border-purple-700 p-6 rounded-2xl w-full max-w-3xl shadow-2xl space-y-4 z-10 my-auto">
+    <!-- MODAL DE BASE DE DATOS (SOLO ACCESIBLE POR URL /#admin) -->
+    <div id="adminModal" class="fixed inset-0 z-50 flex items-center justify-center hidden px-3 sm:px-4">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeAdminModal()"></div>
+        <div class="relative bg-[#1d0f42] border border-purple-700 p-4 sm:p-6 rounded-2xl w-full max-w-2xl shadow-2xl space-y-4 z-10 max-h-[90dvh] overflow-y-auto">
             <div class="flex justify-between items-center border-b border-purple-800 pb-3">
-                <h3 class="font-black text-lg flex items-center gap-2 text-amber-400">
-                    <i class="fa-solid fa-screwdriver-wrench"></i> Panel de Administración (`/#admin`)
+                <h3 class="font-black text-base sm:text-lg flex items-center gap-2 text-amber-400">
+                    <i class="fa-solid fa-database"></i> Panel de Administración (`/#admin`)
                 </h3>
                 <button onclick="closeAdminModal()" class="text-purple-300 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
@@ -810,102 +550,33 @@
                 <p class="text-xs text-purple-200">Panel exclusivo del propietario. Ingresa tu clave maestra:</p>
                 <input type="password" id="adminPasswordInput" placeholder="Contraseña (ohmyadmin2026)" class="w-full bg-[#2a175e] border border-purple-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-400">
                 <button onclick="verifyAdminPassword()" class="w-full bg-amber-400 hover:bg-amber-300 text-slate-950 font-black py-3 rounded-xl text-sm transition">
-                    Desbloquear Panel de Control
+                    Desbloquear Base de Datos
                 </button>
                 <p id="adminErrorMsg" class="text-xs text-pink-400 hidden font-bold">Contraseña incorrecta.</p>
             </div>
 
-            <div id="adminContentSection" class="hidden space-y-5">
-                <!-- Configuración de Base de Datos Remota (Webhook / Firebase / API) -->
+            <div id="adminContentSection" class="hidden space-y-4">
                 <div class="bg-[#160a36] border border-purple-800 p-3.5 rounded-xl space-y-2">
                     <label class="block text-xs font-bold text-amber-400">
                         <i class="fa-solid fa-cloud-arrow-up mr-1"></i> URL de Base de Datos en la Nube / Webhook (Opcional)
                     </label>
-                    <div class="flex gap-2">
-                        <input type="url" id="webhookUrlInput" placeholder="https://discord.com/api/webhooks/... o https://webhook.site/..." class="flex-1 bg-[#210f4d] border border-purple-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none">
-                        <button onclick="saveWebhookUrl()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs">Guardar URL</button>
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <input type="url" id="webhookUrlInput" placeholder="https://discord.com/api/webhooks/... o https://webhook.site/..." class="flex-1 bg-[#210f4d] border border-purple-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none">
+                        <button onclick="saveWebhookUrl()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-4 py-2 rounded-lg text-xs shrink-0">Guardar URL</button>
                     </div>
-                </div>
-
-                <!-- Creador de nuevos productos en vivo -->
-                <div class="bg-[#150932] border border-purple-800 p-4 rounded-xl space-y-3">
-                    <h4 class="font-black text-xs text-amber-400 uppercase tracking-wider">
-                        <i class="fa-solid fa-plus-circle mr-1"></i> Publicar Nuevo Producto en el Catálogo
-                    </h4>
-                    <form id="addProductForm" onsubmit="handleAddCustomProduct(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
-                        <input type="text" id="newProdName" required placeholder="Nombre del Juego o Tarjeta" class="bg-[#241154] border border-purple-700 rounded-lg px-3 py-2 text-white">
-                        <select id="newProdCat" class="bg-[#241154] border border-purple-700 rounded-lg px-3 py-2 text-white">
-                            <option value="game">Juego PC / Consola</option>
-                            <option value="giftcard">Gift Card</option>
-                            <option value="dlc">DLC</option>
-                            <option value="currency">Moneda Virtual</option>
-                            <option value="subscription">Suscripción</option>
-                        </select>
-                        <input type="text" id="newProdPlatform" required placeholder="Plataforma (ej: Steam)" class="bg-[#241154] border border-purple-700 rounded-lg px-3 py-2 text-white">
-                        <input type="number" id="newProdPrice" required placeholder="Precio Oferta ARS (ej: 15000)" class="bg-[#241154] border border-purple-700 rounded-lg px-3 py-2 text-white">
-                        <input type="number" id="newProdOldPrice" required placeholder="Precio Normal ARS (ej: 25000)" class="bg-[#241154] border border-purple-700 rounded-lg px-3 py-2 text-white">
-                        <input type="url" id="newProdImg" placeholder="URL Portada (opcional)" class="bg-[#241154] border border-purple-700 rounded-lg px-3 py-2 text-white">
-                        <button type="submit" class="sm:col-span-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black py-2 rounded-lg transition">
-                            Añadir Producto al Catálogo
-                        </button>
-                    </form>
                 </div>
 
                 <div class="flex flex-wrap justify-between items-center gap-2 text-xs">
                     <span class="text-emerald-400 font-bold">Registros Guardados (<span id="dbCountBadge">0</span>)</span>
                     <div class="flex gap-2">
-                        <button onclick="exportDatabaseJSON()" class="bg-purple-700 hover:bg-purple-600 px-3 py-1.5 rounded-lg text-white font-semibold">Descargar JSON</button>
-                        <button onclick="exportDatabaseCSV()" class="bg-purple-700 hover:bg-purple-600 px-3 py-1.5 rounded-lg text-white font-semibold">Descargar CSV</button>
+                        <button onclick="exportDatabaseJSON()" class="bg-purple-700 hover:bg-purple-600 px-3 py-1.5 rounded-lg text-white font-semibold">JSON</button>
+                        <button onclick="exportDatabaseCSV()" class="bg-purple-700 hover:bg-purple-600 px-3 py-1.5 rounded-lg text-white font-semibold">CSV</button>
                         <button onclick="clearDatabase()" class="bg-red-600/80 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg font-semibold">Vaciar</button>
                     </div>
                 </div>
                 <div id="adminDbRecords" class="space-y-3 max-h-72 overflow-y-auto pr-1 text-xs"></div>
             </div>
         </div>
-    </div>
-
-    <!-- NOTIFICACIÓN FLOTANTE DE COMPRAS EN VIVO (SOCIAL PROOF) -->
-    <div id="livePurchaseToast" class="fixed bottom-5 left-5 z-40 hidden bg-[#1d0f42]/95 backdrop-blur-md border border-purple-600/80 rounded-2xl p-3.5 shadow-2xl flex items-center gap-3 max-w-xs transition-all duration-300">
-        <img id="toastImg" src="" alt="Product" class="w-11 h-14 object-cover rounded-lg shrink-0">
-        <div class="text-xs leading-snug">
-            <p id="toastBuyer" class="font-bold text-emerald-400"></p>
-            <p id="toastProduct" class="text-white font-semibold line-clamp-1"></p>
-            <span id="toastTime" class="text-[10px] text-purple-300">Hace unos segundos • Verificado</span>
-        </div>
-    </div>
-
-    <!-- WIDGET FLOTANTE DE SOPORTE RÁPIDO Y GUÍA DE ACTIVACIÓN -->
-    <div class="fixed bottom-5 right-5 z-40">
-        <div id="supportFaqBox" class="hidden mb-3 w-80 bg-[#1d0f42] border border-purple-600 rounded-2xl shadow-2xl overflow-hidden">
-            <div class="bg-gradient-to-r from-purple-700 to-fuchsia-600 p-4 flex justify-between items-center">
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-headset text-lg text-white"></i>
-                    <div>
-                        <h4 class="font-black text-xs text-white">Centro de Ayuda Argon</h4>
-                        <span class="block text-[10px] text-purple-100">Guías rápidas de activación</span>
-                    </div>
-                </div>
-                <button onclick="toggleSupportWidget()" class="text-white"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="p-4 space-y-2.5 text-xs max-h-80 overflow-y-auto">
-                <details class="bg-[#2a175e] p-2.5 rounded-xl border border-purple-700/60">
-                    <summary class="font-bold cursor-pointer text-white">¿Cómo activo una Key en Steam?</summary>
-                    <p class="text-purple-200 mt-1.5 text-[11px]">Abre Steam ➔ Menú "Juegos" ➔ "Activar un producto en Steam" y pega el código de tu bóveda.</p>
-                </details>
-                <details class="bg-[#2a175e] p-2.5 rounded-xl border border-purple-700/60">
-                    <summary class="font-bold cursor-pointer text-white">¿Cómo canjeo en PlayStation / Xbox?</summary>
-                    <p class="text-purple-200 mt-1.5 text-[11px]">Entra a la tienda desde tu consola, selecciona "Canjear código" e introduce los dígitos sin guiones.</p>
-                </details>
-                <details class="bg-[#2a175e] p-2.5 rounded-xl border border-purple-700/60">
-                    <summary class="font-bold cursor-pointer text-white">¿Cómo funciona el Cashback Argon?</summary>
-                    <p class="text-purple-200 mt-1.5 text-[11px]">Todos empiezan con $0,00 y cada compra acredita saldo automático en tu Cartera Argon para futuras órdenes.</p>
-                </details>
-            </div>
-        </div>
-        <button onclick="toggleSupportWidget()" class="ml-auto w-13 h-13 px-4 py-3.5 rounded-full bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 text-white font-black text-xs shadow-2xl flex items-center gap-2 border border-white/20 transition hover:scale-105">
-            <i class="fa-solid fa-circle-question text-base"></i>
-            <span class="hidden sm:inline">Ayuda & Canje</span>
-        </button>
     </div>
 
     <!-- FOOTER LIMPIO -->
