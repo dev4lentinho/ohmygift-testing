@@ -1,7 +1,20 @@
-/* Estilos personalizados estilo Eneba & Argon */
-body {
+/* Prevención de desbordamiento horizontal en móviles */
+html, body {
     background-color: #12092b;
     color: #ffffff;
+    max-width: 100%;
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Ocultar barra de scroll en las categorías deslizables en celular */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 
 /* Botones de categoría */
@@ -21,17 +34,23 @@ body {
     box-shadow: 0 4px 14px rgba(147, 51, 234, 0.4);
 }
 
-/* Tarjetas de selección de pago idénticas a Eneba */
+/* Tarjetas de selección de pago idénticas a Eneba y adaptables a móvil */
 .eneba-pay-card {
     display: flex;
     align-items: center;
     justify-content: space-between;
     background-color: #35167d;
     border: 2px solid transparent;
-    border-radius: 8px;
-    padding: 18px 22px;
+    border-radius: 10px;
+    padding: 12px 14px;
     cursor: pointer;
     transition: all 0.2s ease;
+}
+
+@media (min-width: 640px) {
+    .eneba-pay-card {
+        padding: 18px 22px;
+    }
 }
 
 .eneba-pay-card:hover {
@@ -47,8 +66,8 @@ body {
 /* Radio button circular estilo Eneba */
 .eneba-radio {
     appearance: none;
-    width: 22px;
-    height: 22px;
+    width: 20px;
+    height: 20px;
     border: 2px solid #cbd5e1;
     border-radius: 50%;
     outline: none;
@@ -57,14 +76,21 @@ body {
     flex-shrink: 0;
 }
 
+@media (min-width: 640px) {
+    .eneba-radio {
+        width: 22px;
+        height: 22px;
+    }
+}
+
 .eneba-radio:checked {
     border-color: #10b981;
 }
 
 .eneba-radio:checked::after {
     content: '';
-    width: 12px;
-    height: 12px;
+    width: 10px;
+    height: 10px;
     background-color: #10b981;
     border-radius: 50%;
     position: absolute;
@@ -93,7 +119,7 @@ body {
     transform: scale(1.06);
 }
 
-/* Miniaturas del nuevo Carrusel Spotlight */
+/* Miniaturas del Banner Spotlight */
 .hero-thumb-item {
     position: relative;
     overflow: hidden;
@@ -103,7 +129,6 @@ body {
 .hero-thumb-item.active-thumb {
     background-color: #2c1669;
     border-color: #c084fc;
-    transform: translateX(-4px);
 }
 
 @keyframes progressFill {
@@ -114,39 +139,7 @@ body {
 .hero-progress-bar {
     height: 3px;
     background: linear-gradient(90deg, #f59e0b, #ec4899);
-    animation: progressFill 5.5s linear forwards;
-}
-
-/* Tarjeta de Crédito 3D Interactiva */
-.card-3d-perspective {
-    perspective: 1000px;
-    height: 205px;
-}
-
-.card-3d-inner {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    transition: transform 0.65s cubic-bezier(0.4, 0.2, 0.2, 1);
-    transform-style: preserve-3d;
-}
-
-.card-3d-inner.is-flipped {
-    transform: rotateY(180deg);
-}
-
-.card-3d-front,
-.card-3d-back {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-}
-
-.card-3d-back {
-    transform: rotateY(180deg);
+    animation: progressFill 5s linear forwards;
 }
 
 /* Scrollbar estética */
